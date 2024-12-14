@@ -1,5 +1,6 @@
 "use client";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -39,24 +40,52 @@ const itemVariants = {
   },
 };
 
-const ParticleBackground = () => (
-  <div className="absolute inset-0 overflow-hidden">
-    {[...Array(20)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute rounded-full bg-blue-500/10 animate-float"
-        style={{
-          width: Math.random() * 100 + 50 + "px",
-          height: Math.random() * 100 + 50 + "px",
-          left: Math.random() * 100 + "%",
-          top: Math.random() * 100 + "%",
-          animationDelay: `${Math.random() * 5}s`,
-          animationDuration: `${Math.random() * 10 + 10}s`,
-        }}
-      />
-    ))}
-  </div>
-);
+interface Particle {
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+  delay: number;
+  duration: number;
+}
+
+const ParticleBackground = () => {
+  const [particles, setParticles] = useState<Particle[]>([]);
+
+  useEffect(() => {
+    const generateParticles = () => {
+      return Array.from({ length: 20 }, () => ({
+        width: Math.random() * 100 + 50,
+        height: Math.random() * 100 + 50,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        delay: Math.random() * 5,
+        duration: Math.random() * 10 + 10,
+      }));
+    };
+
+    setParticles(generateParticles());
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {particles.map((particle, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full bg-blue-500/10 animate-float"
+          style={{
+            width: `${particle.width}px`,
+            height: `${particle.height}px`,
+            left: `${particle.left}%`,
+            top: `${particle.top}%`,
+            animationDelay: `${particle.delay}s`,
+            animationDuration: `${particle.duration}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 interface FeatureCard {
   icon: LucideIcon;

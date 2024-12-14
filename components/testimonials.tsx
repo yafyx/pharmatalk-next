@@ -1,7 +1,9 @@
 "use client";
 import React, { useEffect } from "react";
 import { motion, useAnimation, useInView } from "framer-motion";
-import { Card, CardBody, Avatar } from "@nextui-org/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Quote } from "lucide-react";
 
 import avatar1 from "@/public/assets/testimonial/avatar-1.png";
 import avatar2 from "@/public/assets/testimonial/avatar-2.png";
@@ -110,39 +112,34 @@ const TestimonialsColumn = (props: {
         {[
           ...new Array(2).fill(0).map((_, index) => (
             <React.Fragment key={index}>
-              {props.testimonials.map(
-                ({ text, imageSrc, name, role: username }, idx) => (
-                  <motion.div
-                    key={username}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: idx * 0.1 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                  >
-                    <Card className="bg-gradient-to-br from-white/90 to-white/50 backdrop-blur-lg p-4 border border-white/20 shadow-xl">
-                      <CardBody className="p-6">
-                        <p className="text-gray-900">{text}</p>
-                        <div className="flex items-center gap-3 mt-4">
-                          <Avatar
-                            className="w-10 h-10"
-                            name={name}
-                            size="sm"
-                            src={imageSrc}
-                          />
-                          <div className="flex flex-col">
-                            <span className="font-medium text-gray-900 text-sm">
-                              {name}
-                            </span>
-                            <span className="text-gray-600 text-sm">
-                              {username}
-                            </span>
-                          </div>
+              {props.testimonials.map(({ text, imageSrc, name, role }, idx) => (
+                <motion.div
+                  key={`${name}-${role}-${idx}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: idx * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                >
+                  <Card className="relative bg-white/90 backdrop-blur-lg border border-gray-100 shadow-lg">
+                    <CardContent className="p-6">
+                      <Quote className="absolute top-6 right-6 w-8 h-8 text-gray-200" />
+                      <p className="text-gray-700 relative">{text}</p>
+                      <div className="flex items-center gap-3 mt-4">
+                        <Avatar>
+                          <AvatarImage alt={name} src={imageSrc} />
+                          <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900 text-sm">
+                            {name}
+                          </span>
+                          <span className="text-gray-500 text-sm">{role}</span>
                         </div>
-                      </CardBody>
-                    </Card>
-                  </motion.div>
-                )
-              )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </React.Fragment>
           )),
         ]}

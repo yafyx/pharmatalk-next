@@ -2,8 +2,9 @@
 import { motion } from "framer-motion";
 import { useScroll } from "framer-motion";
 import { useRef } from "react";
-import { Button } from "@nextui-org/button";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { SignedOut } from "@clerk/nextjs";
 
 export const CallToAction = () => {
   const router = useRouter();
@@ -100,17 +101,21 @@ export const CallToAction = () => {
           className="mt-12 flex justify-center"
           variants={itemVariants}
         >
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              className="px-8 py-6 text-lg font-semibold rounded-2xl
-              bg-black text-white transition-all duration-300
-              shadow-[0_0_0_3px_rgba(0,0,0,0.1)] hover:shadow-[0_0_0_3px_rgba(0,0,0,0.2)]
-              hover:bg-gray-900"
-              onClick={() => router.push("/auth/register")}
-            >
-              Daftar Gratis
-            </Button>
-          </motion.div>
+          <SignedOut>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="lg"
+                className="px-8 h-14 text-lg font-semibold rounded-2xl
+                bg-black hover:bg-gray-900 text-white
+                shadow-[0_0_0_3px_rgba(0,0,0,0.1)] 
+                hover:shadow-[0_0_0_3px_rgba(0,0,0,0.2)]
+                transition-all duration-300"
+                onClick={() => router.push("/sign-up")}
+              >
+                Daftar Gratis
+              </Button>
+            </motion.div>
+          </SignedOut>
         </motion.div>
       </motion.div>
     </section>
