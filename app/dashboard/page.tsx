@@ -81,197 +81,221 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
-      <div className="max-w-7xl mx-auto py-12 px-4 mt-20">
-        <div className="space-y-10">
-          <div className="flex justify-between items-center backdrop-blur-sm bg-background/30 p-6 rounded-2xl border">
-            <h1 className="text-4xl font-bold">Halo, {user.firstName}!</h1>
-            <Button
-              className="font-bold"
-              variant="secondary"
-              onClick={() => setIsChatOpen(!isChatOpen)}
-            >
-              <MessageSquare className="mr-2 h-5 w-5" />
-              Live Chat
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted mt-20">
+      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 lg:space-y-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 backdrop-blur-sm bg-background/30 p-4 sm:p-6 rounded-2xl border">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+              Halo, {user.firstName}!
+            </h1>
+            <p className="text-muted-foreground">
+              Selamat datang kembali di PharmaChat
+            </p>
           </div>
+          <Button
+            className="w-full sm:w-auto font-medium"
+            variant="secondary"
+            onClick={() => setIsChatOpen(!isChatOpen)}
+          >
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Live Chat
+          </Button>
+        </div>
 
-          {isChatOpen && (
-            <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom">
-              {/* <Chat /> */}
-            </div>
-          )}
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="border shadow-sm">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
+            <div className="space-y-1">
               <CardTitle>Topik Terkini</CardTitle>
-              <Button variant="ghost" onClick={() => router.push("/artikel")}>
-                Lihat selengkapnya
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {isLoading
-                  ? Array(2)
-                      .fill(0)
-                      .map((_, index) => (
-                        <Card key={`skeleton-${index}`}>
-                          <CardContent className="p-4">
-                            <Skeleton className="h-48 w-full rounded-lg" />
-                            <div className="flex gap-2 mt-4">
-                              <Skeleton className="h-4 w-20" />
-                              <Skeleton className="h-4 w-24" />
-                            </div>
-                            <Skeleton className="h-6 w-3/4 mt-4" />
-                            <Skeleton className="h-4 w-full mt-2" />
-                          </CardContent>
-                        </Card>
-                      ))
-                  : articles.map((article) => (
-                      <Card
-                        key={article.id}
-                        className="group hover:shadow-lg transition-all duration-300"
-                      >
+              <p className="text-sm text-muted-foreground">
+                Artikel kesehatan terbaru untuk Anda
+              </p>
+            </div>
+            <Button variant="ghost" onClick={() => router.push("/artikel")}>
+              Lihat selengkapnya
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {isLoading
+                ? Array(2)
+                    .fill(0)
+                    .map((_, index) => (
+                      <Card key={`skeleton-${index}`}>
                         <CardContent className="p-4">
-                          <div className="relative overflow-hidden rounded-lg">
-                            <Image
-                              alt={article.title}
-                              className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                              height={200}
-                              src={article.image || "/placeholder.svg"}
-                              width={400}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          </div>
+                          <Skeleton className="h-48 w-full rounded-lg" />
                           <div className="flex gap-2 mt-4">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-4 w-24" />
+                          </div>
+                          <Skeleton className="h-6 w-3/4 mt-4" />
+                          <Skeleton className="h-4 w-full mt-2" />
+                        </CardContent>
+                      </Card>
+                    ))
+                : articles.map((article) => (
+                    <Card
+                      key={article.id}
+                      className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
+                    >
+                      <CardContent className="p-0">
+                        <div className="relative">
+                          <Image
+                            alt={article.title}
+                            className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
+                            height={200}
+                            src={article.image || "/placeholder.svg"}
+                            width={400}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                        <div className="p-4 space-y-3">
+                          <div className="flex flex-wrap gap-2">
                             <Badge variant="secondary">Kesehatan</Badge>
                             <Badge>{article.author.name}</Badge>
                           </div>
-                          <h3 className="text-lg font-semibold mt-2">
+                          <h3 className="text-lg font-semibold line-clamp-2">
                             {article.title}
                           </h3>
-                          <p className="text-muted-foreground line-clamp-2">
+                          <p className="text-muted-foreground text-sm line-clamp-2">
                             {article.content}
                           </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-              </div>
-            </CardContent>
-          </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="border shadow-sm">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
+            <div className="space-y-1">
               <CardTitle>Cari Obat</CardTitle>
-              <Button variant="ghost" onClick={() => router.push("/cari-obat")}>
-                Lihat selengkapnya
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-10" placeholder="Cari obat..." />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
-                {isLoading
-                  ? Array(3)
-                      .fill(0)
-                      .map((_, index) => (
-                        <Card key={`skeleton-medicine-${index}`}>
-                          <CardContent className="p-4">
-                            <Skeleton className="aspect-square rounded-lg" />
-                            <Skeleton className="h-4 w-3/4 mt-4" />
-                            <Skeleton className="h-3 w-1/2 mt-2" />
-                          </CardContent>
-                        </Card>
-                      ))
-                  : medicines.map((medicine) => (
-                      <Card
-                        key={medicine.id}
-                        className="hover:shadow-lg cursor-pointer transition-shadow"
-                      >
+              <p className="text-sm text-muted-foreground">
+                Temukan informasi obat yang Anda butuhkan
+              </p>
+            </div>
+            <Button variant="ghost" onClick={() => router.push("/cari-obat")}>
+              Lihat selengkapnya
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="relative max-w-md mx-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input className="pl-10" placeholder="Cari obat..." />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              {isLoading
+                ? Array(3)
+                    .fill(0)
+                    .map((_, index) => (
+                      <Card key={`skeleton-medicine-${index}`}>
                         <CardContent className="p-4">
-                          <Image
-                            alt={medicine.name}
-                            className="w-full aspect-square object-cover rounded-lg"
-                            height={200}
-                            src="/placeholder.svg"
-                            width={200}
-                          />
-                          <h4 className="font-semibold mt-2">
-                            {medicine.name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {medicine.category}
-                          </p>
+                          <Skeleton className="aspect-square rounded-lg" />
+                          <Skeleton className="h-4 w-3/4 mt-4" />
+                          <Skeleton className="h-3 w-1/2 mt-2" />
                         </CardContent>
                       </Card>
-                    ))}
-              </div>
-            </CardContent>
-          </Card>
+                    ))
+                : medicines.map((medicine) => (
+                    <Card
+                      key={medicine.id}
+                      className="hover:shadow-lg cursor-pointer transition-shadow"
+                    >
+                      <CardContent className="p-4">
+                        <Image
+                          alt={medicine.name}
+                          className="w-full aspect-square object-cover rounded-lg"
+                          height={200}
+                          src="/placeholder.svg"
+                          width={200}
+                        />
+                        <h4 className="font-semibold mt-2">{medicine.name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {medicine.category}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="border shadow-sm">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
+            <div className="space-y-1">
               <CardTitle>Apotek Terdekat</CardTitle>
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/cari-apotek")}
-              >
-                Lihat selengkapnya
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="h-[400px] rounded-xl overflow-hidden shadow-lg">
-                  {/* <Map /> */}
+              <p className="text-sm text-muted-foreground">
+                Temukan apotek di sekitar Anda
+              </p>
+            </div>
+            <Button variant="ghost" onClick={() => router.push("/cari-apotek")}>
+              Lihat selengkapnya
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="h-[300px] sm:h-[400px] rounded-xl overflow-hidden shadow-md">
+                {/* <Map /> */}
+              </div>
+              <div className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    className="pl-10"
+                    placeholder="Cari apotek terdekat..."
+                  />
                 </div>
-                <div className="space-y-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      className="pl-10"
-                      placeholder="Cari apotek terdekat..."
-                    />
-                  </div>
-                  <div className="space-y-4 max-h-[340px] overflow-y-auto scrollbar-thin">
-                    {[1, 2, 3].map((index) => (
-                      <Card key={index}>
-                        <CardContent className="p-4">
-                          <h4 className="font-semibold">Apotek Rahman</h4>
-                          <div className="flex items-center text-muted-foreground mt-2">
-                            <MapPin className="mr-2 h-4 w-4" />
-                            <p>Jl. Simatupang No.1, Menteng</p>
+                <div className="space-y-3 max-h-[250px] sm:max-h-[340px] overflow-y-auto scrollbar-thin">
+                  {[1, 2, 3].map((index) => (
+                    <Card
+                      key={index}
+                      className="hover:shadow-md transition-shadow"
+                    >
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold">Apotek Rahman</h4>
+                        <div className="flex items-start text-muted-foreground mt-2">
+                          <MapPin className="mr-2 h-4 w-4 mt-1 flex-shrink-0" />
+                          <p className="text-sm">
+                            Jl. Simatupang No.1, Menteng
+                          </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-3">
+                          <div className="flex items-center text-muted-foreground">
+                            <Navigation className="mr-2 h-4 w-4" />
+                            <span className="text-sm">2.5 km</span>
                           </div>
-                          <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center text-muted-foreground">
-                              <Navigation className="mr-2 h-4 w-4" />
-                              <span>2.5 km</span>
-                            </div>
-                            <Button
-                              variant="link"
-                              onClick={() => {
-                                window.open(
-                                  `https://maps.goo.gl/xyz${index}`,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              Petunjuk Arah →
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full sm:w-auto"
+                            onClick={() => {
+                              window.open(
+                                `https://maps.goo.gl/xyz${index}`,
+                                "_blank"
+                              );
+                            }}
+                          >
+                            Petunjuk Arah →
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {isChatOpen && (
+          <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 duration-200">
+            {/* <Chat /> */}
+          </div>
+        )}
       </div>
     </div>
   );
