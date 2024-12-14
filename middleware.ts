@@ -1,11 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-const protectedRoutes = createRouteMatcher(['/dashboard(.*)', '/admin(.*)'])
+const isDashboardRoute = createRouteMatcher(['/dashboard(.*)'])
+const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 
-export default clerkMiddleware(async (auth, request) => {
-    if (protectedRoutes(request)) {
-        await auth.protect()
-    }
+export default clerkMiddleware(async (auth, req) => {
+    // Restrict admin route to users with admin role
+    if (isAdminRoute(req)) await auth.protect({ role: 'org:admin' })
+
+    // Restrict dashboard routes to signed in users
+    if (isDashboardRoute(req)) await auth.protect()
 })
 
 export const config = {
