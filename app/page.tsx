@@ -1,9 +1,18 @@
-import { Button } from "@/components/ui/button";
+import { Hero } from "@/components/hero";
 
 export default function Home() {
   return (
     <div>
-      <Button>Click me</Button>
+      <Hero />
+      {/* <div id="pelayanan">
+        <Showcase />
+      </div>
+      <div id="rekomendasi">
+        <Testimonials />
+      </div>
+      <div id="kontak">
+        <CallToAction />
+      </div> */}
     </div>
   );
 }
