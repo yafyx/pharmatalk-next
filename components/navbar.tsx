@@ -1,21 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { useUser, SignOutButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import {
+  useUser,
+  SignOutButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, ArrowRight } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Navbar() {
   const { user, isLoaded } = useUser();
@@ -98,31 +97,13 @@ export function Navbar() {
 
           <div className="flex items-center gap-4">
             <SignedIn>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Avatar className="h-8 w-8 cursor-pointer">
-                    <AvatarImage src={user?.imageUrl} />
-                    <AvatarFallback>{user?.firstName?.[0]}</AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="flex flex-col space-y-1 p-2">
-                    <p className="font-medium">{user?.fullName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {user?.primaryEmailAddress?.emailAddress}
-                    </p>
-                  </div>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-600">
-                    <SignOutButton />
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "h-8 w-8",
+                  },
+                }}
+              />
 
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild className="md:hidden">
