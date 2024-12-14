@@ -42,7 +42,7 @@ export const CallToAction = () => {
       ref={sectionRef}
       className="relative py-32 overflow-hidden"
       style={{
-        background: "linear-gradient(180deg, #ffffff 0%, #7FD1AE 100%)",
+        background: "linear-gradient(180deg, #e6f5ed 0%, #7FD1AE 100%)",
       }}
     >
       <div className="absolute inset-0 overflow-hidden">

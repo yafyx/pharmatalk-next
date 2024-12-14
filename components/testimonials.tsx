@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote } from "lucide-react";
 
 import avatar1 from "@/public/assets/testimonial/avatar-1.png";
 import avatar2 from "@/public/assets/testimonial/avatar-2.png";
@@ -122,7 +121,6 @@ const TestimonialsColumn = (props: {
                 >
                   <Card className="relative bg-white/90 backdrop-blur-lg border border-gray-100 shadow-lg">
                     <CardContent className="p-6">
-                      <Quote className="absolute top-6 right-6 w-8 h-8 text-gray-200" />
                       <p className="text-gray-700 relative">{text}</p>
                       <div className="flex items-center gap-3 mt-4">
                         <Avatar>
@@ -160,8 +158,8 @@ export const Testimonials = () => {
   }, [controls, isInView]);
 
   return (
-    <section className="bg-gradient-to-b from-white via-gray-50 to-white py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,#f5f5f5,transparent)]" />
+    <section className="bg-gradient-to-b from-white via-gray-50 to-[#e6f5ed] py-24 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,#e6f5ed,transparent)]" />
 
       <div className="container mx-auto px-4 max-w-7xl relative">
         <motion.div
