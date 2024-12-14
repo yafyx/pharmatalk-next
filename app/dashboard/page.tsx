@@ -89,7 +89,7 @@ export default function Dashboard() {
               Halo, {user.firstName}!
             </h1>
             <p className="text-muted-foreground">
-              Selamat datang kembali di PharmaChat
+              Selamat datang kembali di PharmaTalk
             </p>
           </div>
           <Button
