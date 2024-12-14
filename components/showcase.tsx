@@ -1,13 +1,14 @@
 "use client";
-import { motion } from "framer-motion";
-import { Card, CardBody } from "@nextui-org/react";
-import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
-  FaStethoscope,
-  FaPills,
-  FaMapMarkerAlt,
-  FaNewspaper,
-} from "react-icons/fa";
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Stethoscope, Pill, MapPin, Newspaper, LucideIcon } from "lucide-react";
 
 import pfizerLogo from "@/public/assets/logo-pfizer.png";
 import gskLogo from "@/public/assets/logo-gsk.png";
@@ -38,29 +39,87 @@ const itemVariants = {
   },
 };
 
+const ParticleBackground = () => (
+  <div className="absolute inset-0 overflow-hidden">
+    {[...Array(20)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute rounded-full bg-blue-500/10 animate-float"
+        style={{
+          width: Math.random() * 100 + 50 + "px",
+          height: Math.random() * 100 + 50 + "px",
+          left: Math.random() * 100 + "%",
+          top: Math.random() * 100 + "%",
+          animationDelay: `${Math.random() * 5}s`,
+          animationDuration: `${Math.random() * 10 + 10}s`,
+        }}
+      />
+    ))}
+  </div>
+);
+
+interface FeatureCard {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  gradient: string;
+  action: string;
+}
+
+const features: FeatureCard[] = [
+  {
+    icon: Stethoscope,
+    title: "Konsultasi Langsung",
+    description:
+      "Interaksi langsung bersama ahli apoteker handal untuk menemukan obat terbaik Anda!",
+    gradient: "from-blue-500 to-blue-600",
+    action: "Mulai Konsultasi",
+  },
+  {
+    icon: Pill,
+    title: "Pencarian Obat Terbaik",
+    description:
+      "Temukan rekomendasi obat terbaik sesuai keluhan dan kebutuhan kesehatan Anda!",
+    gradient: "from-teal-500 to-teal-600",
+    action: "Cari Obat",
+  },
+  {
+    icon: MapPin,
+    title: "Lokasi Apotek Terdekat",
+    description:
+      "Temukan lokasi apotek terdekat dengan mudah untuk akses cepat ke obat yang Anda butuhkan.",
+    gradient: "from-indigo-500 to-indigo-600",
+    action: "Cari Apotek",
+  },
+  {
+    icon: Newspaper,
+    title: "Topik Kesehatan",
+    description:
+      "Memastikan Anda selalu terdepan dengan berita dan informasi terkini seputar dunia kesehatan.",
+    gradient: "from-sky-500 to-sky-600",
+    action: "Baca Artikel",
+  },
+];
+
 export const Showcase = () => {
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+
   return (
     <>
-      <div className="py-12 md:py-16 bg-white relative overflow-hidden">
+      <div className="py-16 md:py-24 bg-white/80 backdrop-blur-sm relative overflow-hidden">
+        <ParticleBackground />
         <motion.div
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 bg-gradient-to-r from-blue-50 via-transparent to-blue-50"
-          initial={{ opacity: 0 }}
-          transition={{ duration: 1 }}
+          style={{ opacity }}
+          className="absolute inset-0 bg-gradient-to-r from-blue-50/80 via-transparent to-blue-50/80"
         />
-        <div className="container mx-auto flex justify-center items-center">
-          <div
-            className="flex overflow-hidden w-full max-w-5xl"
-            style={{
-              maskImage:
-                "linear-gradient(to right, transparent, black, transparent)",
-            }}
-          >
+        <div className="container mx-auto">
+          <div className="flex overflow-hidden w-full max-w-6xl mx-auto">
             <motion.div
               animate={{
                 translateX: "-50%",
               }}
-              className="flex gap-14 flex-none pr-14"
+              className="flex gap-20 flex-none pr-20"
               transition={{
                 duration: 20,
                 repeat: Infinity,
@@ -76,13 +135,19 @@ export const Showcase = () => {
                 rocheLogo,
                 novartisLogo,
               ].map((logo, index) => (
-                <Image
+                <motion.div
                   key={`logo-${index}`}
-                  alt={`Partner logo ${index + 1}`}
-                  className="logo-ticker-image"
-                  height={60}
-                  src={logo}
-                />
+                  whileHover={{ scale: 1.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-blue-100 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Image
+                    alt={`Partner logo ${index + 1}`}
+                    className="relative z-10 transition-transform duration-300 grayscale hover:grayscale-0"
+                    height={70}
+                    src={logo}
+                  />
+                </motion.div>
               ))}
               {[
                 pfizerLogo,
@@ -92,42 +157,36 @@ export const Showcase = () => {
                 rocheLogo,
                 novartisLogo,
               ].map((logo, index) => (
-                <Image
+                <motion.div
                   key={`logo-duplicate-${index}`}
-                  alt={`Partner logo ${index + 1}`}
-                  className="logo-ticker-image"
-                  height={60}
-                  src={logo}
-                />
+                  whileHover={{ scale: 1.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-blue-100 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Image
+                    alt={`Partner logo ${index + 1}`}
+                    className="relative z-10 transition-transform duration-300 grayscale hover:grayscale-0"
+                    height={70}
+                    src={logo}
+                  />
+                </motion.div>
               ))}
             </motion.div>
           </div>
         </div>
       </div>
 
-      <section className="bg-gradient-to-b from-[#FFFFFF] to-[#9EDFFF] py-20 md:py-32 overflow-hidden relative">
-        {/* <motion.div
-          animate={{ backgroundPosition: "100% 100%" }}
-          className="absolute inset-0 opacity-30"
-          initial={{ backgroundPosition: "0 0" }}
-          style={{
-            backgroundImage: "url('/assets/grid-pattern.png')",
-            backgroundSize: "cover",
-          }}
-          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
-        /> */}
-
+      <section className="bg-gradient-to-b from-[#FFFFFF] via-[#E3F2FF] to-[#9EDFFF] py-24 md:py-40 overflow-hidden relative">
         <div className="container px-4 mx-auto relative z-10">
-          <motion.div
-            className="max-w-[640px] mx-auto mb-16"
-            initial="hidden"
-            variants={containerVariants}
-            viewport={{ once: true }}
-            whileInView="visible"
-          >
+          <motion.div className="max-w-[720px] mx-auto mb-20">
             <motion.div className="flex justify-center" variants={itemVariants}>
-              <div className="tag text-gray-800 bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full shadow-lg">
-                Kesehatan Anda Prioritas Kami
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur-lg opacity-20" />
+                <div className="relative px-8 py-3 bg-white/90 backdrop-blur rounded-full shadow-xl">
+                  <span className="text-gray-800 font-medium">
+                    Kesehatan Anda Prioritas Kami
+                  </span>
+                </div>
               </div>
             </motion.div>
 
@@ -149,71 +208,43 @@ export const Showcase = () => {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 max-w-7xl mx-auto"
             initial="hidden"
             variants={containerVariants}
             viewport={{ once: true }}
             whileInView="visible"
           >
-            {[
-              {
-                icon: FaStethoscope,
-                title: "Konsultasi Langsung Secara Real-time",
-                description:
-                  "Interaksi langsung bersama ahli apoteker handal untuk menemukan obat terbaik Anda!",
-                gradient: "from-[#60A5FA] to-[#3B82F6]",
-              },
-              {
-                icon: FaPills,
-                title: "Pencarian Obat Terbaik",
-                description:
-                  "Temukan rekomendasi obat terbaik sesuai keluhan dan kebutuhan kesehatan Anda!",
-                gradient: "from-[#2DD4BF] to-[#0D9488]",
-              },
-              {
-                icon: FaMapMarkerAlt,
-                title: "Lokasi Apotek Terdekat",
-                description:
-                  "Temukan lokasi apotek terdekat dengan mudah untuk akses cepat ke obat yang Anda butuhkan.",
-                gradient: "from-[#818CF8] to-[#4F46E5]",
-              },
-              {
-                icon: FaNewspaper,
-                title: "Topik Kesehatan Terhangat",
-                description:
-                  "Memastikan Anda selalu terdepan dengan berita dan informasi terkini seputar dunia kesehatan.",
-                gradient: "from-[#38BDF8] to-[#0284C7]",
-              },
-            ].map((card, index) => (
+            {features.map((feature, index) => (
               <motion.div key={index} variants={itemVariants}>
-                <Card className="group h-full border-none hover:scale-105 transition-all duration-500">
-                  <CardBody
-                    className={`text-center p-8 bg-gradient-to-br ${card.gradient} rounded-2xl overflow-hidden relative`}
-                  >
-                    <motion.div
-                      className="absolute inset-0 bg-white/10"
-                      transition={{ duration: 0.3 }}
-                      whileHover={{ opacity: 0.2 }}
-                    />
-                    <div className="relative z-10">
-                      <motion.div
-                        transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 10,
-                        }}
-                        whileHover={{ scale: 1.1 }}
+                <Card className="group relative overflow-hidden border-none bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                  <div
+                    className={`absolute inset-0 opacity-10 bg-gradient-to-br ${feature.gradient}`}
+                  />
+                  <CardHeader className="text-center pt-8">
+                    <div className="mx-auto mb-4">
+                      <div
+                        className={`p-3 rounded-xl bg-gradient-to-br ${feature.gradient} text-white inline-flex`}
                       >
-                        <card.icon className="w-12 h-12 mx-auto mb-6 text-white" />
-                      </motion.div>
-                      <h3 className="text-xl font-bold mb-4 text-white">
-                        {card.title}
-                      </h3>
-                      <p className="text-white/90 leading-relaxed">
-                        {card.description}
-                      </p>
+                        <feature.icon className="w-6 h-6" />
+                      </div>
                     </div>
-                  </CardBody>
+                    <h3 className="font-semibold text-xl tracking-tight">
+                      {feature.title}
+                    </h3>
+                  </CardHeader>
+                  <CardContent className="text-center px-8">
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="justify-center pb-8">
+                    <Button
+                      variant="outline"
+                      className={`group-hover:bg-gradient-to-r ${feature.gradient} group-hover:text-white transition-all duration-300`}
+                    >
+                      {feature.action}
+                    </Button>
+                  </CardFooter>
                 </Card>
               </motion.div>
             ))}
