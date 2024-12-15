@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Chat } from "@/components/chat";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 // import "leaflet/dist/leaflet.css";
 
@@ -294,6 +295,7 @@ export default function Dashboard() {
         </Card>
 
         <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <DialogTitle></DialogTitle>
           <DialogContent className="max-w-4xl h-[80vh]">
             <Chat />
           </DialogContent>
