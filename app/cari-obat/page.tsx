@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
 
@@ -29,39 +29,35 @@ interface Medicine {
   manufacturer?: string;
 }
 
-const MOCK_MEDICINES: Medicine[] = [
-  {
-    id: "1",
-    name: "Paracetamol",
-    category: "Analgesik",
-    price: 15000,
-    desc: "Obat untuk meredakan nyeri dan menurunkan demam",
-    dosage: "500-1000mg setiap 4-6 jam",
-    indication: "Demam, sakit kepala, nyeri ringan",
-    sideEffects: "Mual, gangguan liver jika overdosis",
-    warning: "Jangan melebihi dosis yang dianjurkan",
-  },
-  {
-    id: "2",
-    name: "Ibuprofen",
-    category: "Anti-inflamasi",
-    price: 20000,
-    desc: "Obat untuk mengurangi peradangan dan nyeri",
-    dosage: "200-400mg setiap 4-6 jam",
-    indication: "Nyeri otot, nyeri sendi, demam",
-    sideEffects: "Mual, gangguan pencernaan",
-    warning: "Hindari penggunaan jangka panjang",
-  },
-];
-
 export default function CariObatPage() {
-  const [medicines] = useState<Medicine[]>(MOCK_MEDICINES);
-  const [loading] = useState(false);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(
     null
   );
+
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/obat${searchQuery ? `?query=${searchQuery}` : ""}`
+        );
+        const data = await response.json();
+        if (data.success) {
+          setMedicines(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch medicines:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMedicines();
+  }, [searchQuery]);
 
   const filteredMedicines = medicines.filter((medicine) =>
     medicine.name.toLowerCase().includes(searchQuery.toLowerCase())
