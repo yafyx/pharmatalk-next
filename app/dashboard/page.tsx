@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Chat } from "@/components/chat";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 // import "leaflet/dist/leaflet.css";
 
@@ -291,11 +293,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {isChatOpen && (
-          <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 duration-200">
-            {/* <Chat /> */}
-          </div>
-        )}
+        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <DialogContent className="max-w-4xl h-[80vh]">
+            <Chat />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

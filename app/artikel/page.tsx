@@ -1,6 +1,7 @@
 "use client";
-// import type { Article } from "@/types/articles";
 
+import { useEffect, useState } from "react";
+import type { Artikel } from "@/types/artikel";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -8,58 +9,41 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-// Mock data
-const mockArticles = [
-  {
-    id: "1",
-    title: "Pentingnya Vaksinasi COVID-19",
-    content:
-      "Vaksinasi merupakan langkah penting dalam mencegah penyebaran virus COVID-19...",
-    image:
-      "https://images.unsplash.com/photo-1584515933487-779824d29309?w=800&auto=format&fit=crop&q=60",
-    author: { name: "Dr. Smith" },
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Tips Menjaga Kesehatan Mental",
-    content:
-      "Kesehatan mental sama pentingnya dengan kesehatan fisik. Berikut beberapa cara...",
-    image:
-      "https://images.unsplash.com/photo-1493836512294-502baa1986e2?w=800&auto=format&fit=crop&q=60",
-    author: { name: "Dr. Johnson" },
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    title: "Manfaat Olahraga Rutin",
-    content:
-      "Olahraga rutin memiliki berbagai manfaat bagi kesehatan tubuh dan pikiran...",
-    image:
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=60",
-    author: { name: "Dr. Wilson" },
-    createdAt: new Date().toISOString(),
-  },
-];
-
 const categories = [
   { id: "all", label: "Semua" },
-  { id: "health", label: "Kesehatan Umum" },
-  { id: "medicine", label: "Obat-obatan" },
-  { id: "lifestyle", label: "Gaya Hidup" },
+  { id: "kesehatan", label: "Kesehatan Umum" },
+  { id: "farmasi", label: "Obat-obatan" },
+  { id: "gaya-hidup", label: "Gaya Hidup" },
 ];
 
 export default function Articles() {
+  const [articles, setArticles] = useState<Artikel[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredArticles = mockArticles.filter((article) =>
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        const response = await fetch("/api/artikel");
+        if (!response.ok) throw new Error("Failed to fetch articles");
+        const data = await response.json();
+        setArticles(data);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchArticles();
+  }, []);
+
+  const filteredArticles = articles.filter((article) =>
     article.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -159,7 +143,7 @@ export default function Articles() {
                   initial={{ opacity: 0, y: 20 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Link href={`/artikel/${article.id}`}>
+                  <Link href={`/artikel/${article.slug}`}>
                     <Card className="group hover:scale-[1.02] transition-all duration-500 hover:shadow-xl h-[400px] md:h-[450px] lg:h-[500px] bg-white/80 backdrop-blur-sm border-transparent hover:border-emerald-500/20">
                       <CardContent className="p-0 flex flex-col h-full">
                         <div className="relative h-[200px] md:h-[250px] overflow-hidden rounded-t-xl">
