@@ -182,90 +182,86 @@ export const Hero = () => {
           </div>
 
           <div className="relative h-[400px] md:h-[648px]">
-            <motion.div
-              animate="animate"
-              className="md:absolute md:h-full md:w-auto md:max-w-none md:-left-0 top-10 lg:left-40"
-              initial="initial"
-              variants={floatingPillsVariants}
-            />
-            <Card className="w-[380px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] bg-white/95 backdrop-blur-md md:ml-20 md:mt-14 rounded-2xl border-0">
-              <CardHeader className="p-4 border-b bg-gradient-to-r from-gray-50 to-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
-                      <AvatarImage src="/assets/pharmacist-avatar.jpg" />
-                      <AvatarFallback>DL</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h2 className="font-semibold text-black flex items-center gap-2">
-                        Dr. Lina
-                        <Badge variant="secondary" className="h-5">
-                          <span className="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse" />
-                          Online
-                        </Badge>
-                      </h2>
-                      <p className="text-sm text-gray-500">
-                        Apoteker Spesialis
-                      </p>
+            <div className="md:absolute md:h-full md:w-auto md:max-w-none md:-left-0 top-10 lg:left-40">
+              <Card className="w-[380px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] bg-white/95 backdrop-blur-md md:ml-20 md:mt-14 rounded-3xl border-0">
+                <CardHeader className="p-4 border-b bg-gradient-to-r from-gray-50 to-white rounded-t-3xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                        <AvatarImage src="/assets/pharmacist-avatar.jpg" />
+                        <AvatarFallback>L</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h2 className="font-semibold text-black flex items-center gap-2">
+                          Lina
+                          <Badge variant="secondary" className="h-5">
+                            <span className="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse" />
+                            Online
+                          </Badge>
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                          Apoteker Spesialis
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white min-h-[400px]">
-                <AnimatePresence>
-                  {messages.map((message, index) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ delay: index * 0.3 }}
-                      className={cn(
-                        "flex gap-3",
-                        message.sender === "user"
-                          ? "justify-end"
-                          : "justify-start"
-                      )}
-                    >
-                      {message.sender === "agent" && (
-                        <div className="flex flex-col space-y-2 max-w-[85%]">
-                          <div className="bg-white p-4 rounded-2xl rounded-tl-none text-sm text-black shadow-md border border-gray-100">
-                            {message.text}
-                            <div className="text-xs text-gray-400 mt-1">
-                              {message.time}
+                </CardHeader>
+                <CardContent className="p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white min-h-[400px] rounded-b-3xl">
+                  <AnimatePresence>
+                    {messages.map((message, index) => (
+                      <motion.div
+                        key={message.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ delay: index * 0.3 }}
+                        className={cn(
+                          "flex gap-3",
+                          message.sender === "user"
+                            ? "justify-end"
+                            : "justify-start"
+                        )}
+                      >
+                        {message.sender === "agent" && (
+                          <div className="flex flex-col space-y-2 max-w-[85%]">
+                            <div className="bg-white p-4 rounded-2xl rounded-tl-none text-sm text-black shadow-md border border-gray-100">
+                              {message.text}
+                              <div className="text-xs text-gray-400 mt-1">
+                                {message.time}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                      {message.sender === "user" && (
-                        <div className="bg-[#2563EB] p-4 rounded-2xl rounded-tr-none text-sm max-w-[85%] shadow-md text-white">
-                          {message.text}
-                          <div className="text-xs text-blue-100 mt-1 flex items-center justify-end gap-1">
-                            {message.time}
-                            {message.status === "read" && (
-                              <span className="text-blue-100">✓✓</span>
-                            )}
+                        )}
+                        {message.sender === "user" && (
+                          <div className="bg-[#2563EB] p-4 rounded-2xl rounded-tr-none text-sm max-w-[85%] shadow-md text-white">
+                            {message.text}
+                            <div className="text-xs text-blue-100 mt-1 flex items-center justify-end gap-1">
+                              {message.time}
+                              {message.status === "read" && (
+                                <span className="text-blue-100">✓✓</span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                  {isTyping && (
-                    <motion.div className="flex gap-2 px-4 py-2 w-16 bg-gray-100 rounded-full ml-2">
-                      {[...Array(3)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          custom={i}
-                          variants={typingAnimation}
-                          animate="animate"
-                          className="w-2 h-2 bg-gray-400 rounded-full"
-                        />
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </CardContent>
-            </Card>
+                        )}
+                      </motion.div>
+                    ))}
+                    {isTyping && (
+                      <motion.div className="flex gap-2 px-4 py-2 w-16 bg-gray-100 rounded-full ml-2">
+                        {[...Array(3)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            custom={i}
+                            variants={typingAnimation}
+                            animate="animate"
+                            className="w-2 h-2 bg-gray-400 rounded-full"
+                          />
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </CardContent>
+              </Card>
+            </div>
 
             <motion.div
               animate={{
