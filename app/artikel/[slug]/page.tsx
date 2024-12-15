@@ -1,126 +1,127 @@
+import { Metadata } from "next";
 import Image from "next/image";
-import { Calendar, Clock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ArticleNavigation } from "./navigation";
-import { ShareButton } from "./share-button";
 import { notFound } from "next/navigation";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { ChevronLeft, Clock, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-async function getArticle(slug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const url = new URL(`/api/artikel/${encodeURIComponent(slug)}`, baseUrl);
-
-  try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      notFound();
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error("Error fetching article:", error);
-    notFound();
-  }
+interface PageProps {
+  params: Promise<{
+    slug: string;
+  }>;
 }
 
-export default async function ArticleDetail({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  if (!params.slug) notFound();
+async function getArticle(slug: string) {
+  const res = await fetch(
+    `${
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    }/api/artikel/${slug}`
+  );
+  if (!res.ok) return null;
+  return res.json();
+}
 
-  const article = await getArticle(params.slug);
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticle(slug);
+  if (!article) return { title: "Article Not Found" };
+
+  return {
+    title: article.title,
+    description: article.excerpt || article.content.substring(0, 160),
+    openGraph: {
+      title: article.title,
+      description: article.excerpt || article.content.substring(0, 160),
+      images: [{ url: article.image || "/placeholder.svg" }],
+    },
+  };
+}
+
+export default async function ArtikelPage({ params }: PageProps) {
+  const { slug } = await params;
+  const article = await getArticle(slug);
+  if (!article) notFound();
 
   return (
-    <div className="min-h-screen bg-white mt-20">
-      <ArticleNavigation>
-        <ShareButton />
-      </ArticleNavigation>
-
-      <header className="relative h-[50vh] bg-gradient-to-b from-emerald-500 to-teal-500">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">
+      <div className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
         <Image
           src={article.image || "/placeholder.svg"}
           alt={article.title}
           fill
-          className="object-cover opacity-20"
+          className="object-cover"
           priority
+          quality={100}
         />
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-4xl mx-auto px-4 text-white">
-            <Badge className="mb-4 bg-emerald-600 hover:bg-emerald-700">
-              {article.category}
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 -mt-32 relative z-10">
+        <Link
+          href="/artikel"
+          className={cn(
+            buttonVariants({ variant: "ghost" }),
+            "mb-6 bg-white/90 backdrop-blur-sm hover:bg-white/70"
+          )}
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Kembali ke Artikel
+        </Link>
+
+        <article className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-6 md:p-10">
+          <div className="space-y-4 mb-8">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">Kesehatan</Badge>
+              <Badge variant="outline">5 menit baca</Badge>
+            </div>
+
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
               {article.title}
             </h1>
-            <div className="flex items-center gap-6 text-white/90">
+
+            <div className="flex items-center gap-6 text-muted-foreground">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                <User className="h-4 w-4" />
+                <span className="text-sm">{article.author.name}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                {/* <span>{article.readingTime}</span> */}
+                <time className="text-sm">
+                  {format(new Date(article.createdAt), "d MMMM yyyy", {
+                    locale: id,
+                  })}
+                </time>
               </div>
             </div>
           </div>
-        </div>
-      </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 rounded-lg">
-          <Image
-            src={article.author.image || "/placeholder.svg"}
-            alt={article.author.name}
-            width={60}
-            height={60}
-            className="rounded-full"
-          />
-          <div>
-            <h3 className="font-semibold">{article.author.name}</h3>
-            <p className="text-sm text-muted-foreground">
-              {/* {article.author.credentials} */}
-            </p>
+          <div className="prose prose-lg max-w-none">
+            <p className="text-gray-700 leading-relaxed">{article.content}</p>
           </div>
-        </div>
 
-        <article className="prose prose-emerald lg:prose-lg max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: article.content }} />
+          <div className="mt-12 pt-8 border-t">
+            <div className="flex items-center gap-4">
+              <Image
+                src={article.author.image || "/placeholder-avatar.svg"}
+                alt={article.author.name}
+                width={60}
+                height={60}
+                className="rounded-full"
+              />
+              <div>
+                <p className="font-medium">{article.author.name}</p>
+                <p className="text-sm text-muted-foreground">Penulis</p>
+              </div>
+            </div>
+          </div>
         </article>
-
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Artikel Terkait</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* {relatedArticles.map((article) => (
-              <Link key={article.id} href={`/artikel/${article.id}`}>
-                <Card className="group hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
-                      <Image
-                        src={article.image}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                    </div>
-                    <h3 className="font-semibold group-hover:text-emerald-600 transition-colors">
-                      {article.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {article.author.name}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))} */}
-          </div>
-        </section>
-      </main>
+      </div>
     </div>
   );
 }

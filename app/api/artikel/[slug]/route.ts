@@ -1,15 +1,22 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-    request: Request,
-    { params }: { params: { slug: string } }
-) {
+    request: NextRequest,
+    { params }: { params: Promise<{ slug: string }> }
+): Promise<NextResponse> {
     try {
+        const { slug } = await params;
+
+        if (!slug) {
+            return NextResponse.json(
+                { error: 'Slug is required' },
+                { status: 400 }
+            );
+        }
+
         const article = await prisma.artikel.findUnique({
-            where: {
-                slug: params.slug,
-            },
+            where: { slug },
             include: {
                 author: {
                     select: {
