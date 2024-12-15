@@ -31,20 +31,20 @@ const fadeUpVariants = {
   },
 };
 
-const floatingPillsVariants = {
-  initial: { y: 0, rotate: 0, scale: 1 },
-  animate: {
-    y: [0, -20, 0],
-    rotate: [-5, 5, -5],
-    scale: [1, 1.05, 1],
-    transition: {
-      duration: 6,
-      repeat: Infinity,
-      repeatType: "mirror" as const,
-      ease: "easeInOut",
-    },
-  },
-};
+// const floatingPillsVariants = {
+//   initial: { y: 0, rotate: 0, scale: 1 },
+//   animate: {
+//     y: [0, -20, 0],
+//     rotate: [-5, 5, -5],
+//     scale: [1, 1.05, 1],
+//     transition: {
+//       duration: 6,
+//       repeat: Infinity,
+//       repeatType: "mirror" as const,
+//       ease: "easeInOut",
+//     },
+//   },
+// };
 
 const backgroundParticleVariants = {
   animate: (i: number) => ({
