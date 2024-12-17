@@ -72,7 +72,10 @@ export function Navbar() {
 
       <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-20 items-center justify-between max-w-7xl">
-          <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
+          <Link
+            href="/"
+            className="flex items-center space-x-3 flex-shrink-0 min-w-[160px]"
+          >
             <Image
               src="/assets/logo.png"
               alt="PharmaTalk"
@@ -83,20 +86,21 @@ export function Navbar() {
             <span className="font-bold text-lg md:text-xl">PharmaTalk</span>
           </Link>
 
-          <div className="hidden md:flex items-center justify-center gap-8 flex-1 max-w-2xl mx-8">
+          <div className="hidden md:flex items-center justify-center gap-8 flex-1">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleClick(e, link.href)}
-                className="text-base text-muted-foreground hover:text-foreground transition-colors"
+                className="text-base text-muted-foreground hover:text-foreground transition-colors relative group"
               >
                 {link.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-foreground transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
           </div>
 
-          <div className="flex items-center gap-4 md:gap-6 flex-shrink-0">
+          <div className="flex items-center gap-4 md:gap-6 flex-shrink-0 min-w-[160px] justify-end">
             <SignedIn>
               <UserButton
                 appearance={{
@@ -108,12 +112,16 @@ export function Navbar() {
 
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild className="md:hidden">
-                  <Button variant="ghost" size="icon">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-accent transition-colors duration-200"
+                  >
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
-                  <div className="flex flex-col space-y-4 mt-8">
+                  <div className="flex flex-col space-y-6 mt-8">
                     {navLinks.map((link) => (
                       <Link
                         key={link.name}
@@ -122,21 +130,30 @@ export function Navbar() {
                           handleClick(e, link.href);
                           setIsOpen(false);
                         }}
-                        className="text-xl"
+                        className="text-xl hover:text-primary transition-colors duration-200 flex items-center space-x-2 group"
                       >
-                        {link.name}
+                        <span className="w-2 h-2 rounded-full bg-muted-foreground group-hover:bg-primary transition-colors duration-200" />
+                        <span>{link.name}</span>
                       </Link>
                     ))}
-                    <Link href="/dashboard" className="text-xl">
-                      Dashboard
+                    <Link
+                      href="/dashboard"
+                      className="text-xl hover:text-primary transition-colors duration-200 flex items-center space-x-2 group"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground group-hover:bg-primary transition-colors duration-200" />
+                      <span>Dashboard</span>
                     </Link>
-                    <Link href="/profile" className="text-xl">
-                      Profile
+                    <Link
+                      href="/profile"
+                      className="text-xl hover:text-primary transition-colors duration-200 flex items-center space-x-2 group"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground group-hover:bg-primary transition-colors duration-200" />
+                      <span>Profile</span>
                     </Link>
                     <SignOutButton>
                       <Button
                         variant="destructive"
-                        className="w-full mt-4 text-lg"
+                        className="w-full mt-4 text-lg hover:bg-destructive/90 transition-colors duration-200"
                       >
                         Log Out
                       </Button>
