@@ -23,7 +23,7 @@ export async function GET() {
                 }
             }),
             prisma.obat.findMany({
-                take: 5,
+                take: 4,
                 orderBy: {
                     createdAt: 'desc'
                 },

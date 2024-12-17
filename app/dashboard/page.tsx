@@ -24,46 +24,39 @@ import { DialogTitle } from "@radix-ui/react-dialog";
 
 // import "leaflet/dist/leaflet.css";
 
-const articles = [
-  {
-    id: 1,
-    title: "Article 1",
-    content: "Content of article 1",
-    image: "/placeholder.svg",
-    author: { name: "Author 1" },
-  },
-  {
-    id: 2,
-    title: "Article 2",
-    content: "Content of article 2",
-    image: "/placeholder.svg",
-    author: { name: "Author 2" },
-  },
-];
+interface Article {
+  id: number;
+  title: string;
+  slug: string;
+  createdAt: string;
+  author: {
+    name: string;
+    image: string;
+  };
+}
 
-const medicines = [
-  {
-    id: 1,
-    name: "Medicine 1",
-    category: "Category 1",
-  },
-  {
-    id: 2,
-    name: "Medicine 2",
-    category: "Category 2",
-  },
-  {
-    id: 3,
-    name: "Medicine 3",
-    category: "Category 3",
-  },
-];
+interface Medicine {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  manufacturer: string;
+}
+
+interface DashboardData {
+  articles: Article[];
+  medicines: Medicine[];
+}
 
 export default function Dashboard() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [data, setData] = useState<DashboardData>({
+    articles: [],
+    medicines: [],
+  });
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -72,6 +65,24 @@ export default function Dashboard() {
       router.push("/auth/login");
     }
   }, [isLoaded, user, router]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch("/api/dashboard");
+        const data = await response.json();
+        setData(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
   if (!isLoaded) {
     return (
@@ -136,7 +147,7 @@ export default function Dashboard() {
                         </CardContent>
                       </Card>
                     ))
-                : articles.map((article) => (
+                : data.articles.map((article) => (
                     <Card
                       key={article.id}
                       className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
@@ -147,7 +158,7 @@ export default function Dashboard() {
                             alt={article.title}
                             className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                             height={200}
-                            src={article.image || "/placeholder.svg"}
+                            src={article.author.image || "/placeholder.svg"}
                             width={400}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -160,8 +171,15 @@ export default function Dashboard() {
                           <h3 className="text-lg font-semibold line-clamp-2">
                             {article.title}
                           </h3>
-                          <p className="text-muted-foreground text-sm line-clamp-2">
-                            {article.content}
+                          <p className="text-muted-foreground text-sm">
+                            {new Date(article.createdAt).toLocaleDateString(
+                              "id-ID",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )}
                           </p>
                         </div>
                       </CardContent>
@@ -202,7 +220,7 @@ export default function Dashboard() {
                         </CardContent>
                       </Card>
                     ))
-                : medicines.map((medicine) => (
+                : data.medicines.map((medicine) => (
                     <Card
                       key={medicine.id}
                       className="hover:shadow-lg cursor-pointer transition-shadow"
@@ -218,6 +236,12 @@ export default function Dashboard() {
                         <h4 className="font-semibold mt-2">{medicine.name}</h4>
                         <p className="text-sm text-muted-foreground">
                           {medicine.category}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {medicine.manufacturer}
+                        </p>
+                        <p className="text-sm font-medium mt-1">
+                          Rp {medicine.price.toLocaleString("id-ID")}
                         </p>
                       </CardContent>
                     </Card>
