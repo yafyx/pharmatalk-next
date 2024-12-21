@@ -92,7 +92,6 @@ export function Chat() {
   useEffect(() => {
     if (!selectedContact || !user) return;
 
-    // Initial fetch of messages
     async function fetchMessages() {
       if (!selectedContact) return;
       try {
@@ -105,13 +104,11 @@ export function Chat() {
     }
     fetchMessages();
 
-    // WebSocket connection
     const ws = new WebSocket(
       `${process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3000"}/api/ws`
     );
 
     ws.onopen = () => {
-      // Send authentication
       ws.send(
         JSON.stringify({
           type: "auth",
@@ -134,7 +131,6 @@ export function Chat() {
           },
         ]);
 
-        // Update contacts list with new message
         setContacts((prev) => {
           const updatedContacts = [...prev];
           const contactIndex = updatedContacts.findIndex(
@@ -163,6 +159,35 @@ export function Chat() {
   async function sendMessage() {
     if (!selectedContact || !inputValue.trim() || !user) return;
 
+    const tempMessage = {
+      id: Date.now(),
+      content: inputValue,
+      timestamp: new Date().toLocaleTimeString(),
+      sender: "user" as const,
+    };
+
+    setMessages((prev) => [...prev, tempMessage]);
+
+    setContacts((prev) => {
+      const updatedContacts = [...prev];
+      const contactIndex = updatedContacts.findIndex(
+        (c) => c.id === selectedContact.id
+      );
+      if (contactIndex !== -1) {
+        updatedContacts[contactIndex] = {
+          ...updatedContacts[contactIndex],
+          lastMessage: {
+            content: inputValue,
+            timestamp: new Date().toISOString(),
+            isOutgoing: true,
+          },
+        };
+      }
+      return updatedContacts;
+    });
+
+    setInputValue("");
+
     try {
       await fetch("/api/chat", {
         method: "POST",
@@ -173,13 +198,12 @@ export function Chat() {
           content: inputValue,
         }),
       });
-      setInputValue("");
     } catch (error) {
       console.error("Error sending message:", error);
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
     }
   }
 
-  // Helper function to format timestamp
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
