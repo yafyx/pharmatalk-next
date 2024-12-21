@@ -1,24 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { ChatMessage } from "@prisma/client";
-
-const connections = new Map<string, Set<(data: ChatMessage) => void>>();
+import { connections } from "@/lib/chat-connections";
 
 export async function GET(
-    request: Request,
-    { params }: { params: { userId: string } }
+    request: NextRequest,
+    { params }: { params: Promise<{ userId: string }> }
 ) {
     const { userId: currentUserId } = await auth();
     if (!currentUserId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { userId } = await params;
+
     const stream = new ReadableStream({
         start(controller) {
             const encoder = new TextEncoder();
             const send = (msg: ChatMessage) => {
-                if (msg.senderId === currentUserId && msg.receiverId === params.userId ||
-                    msg.senderId === params.userId && msg.receiverId === currentUserId) {
+                if (msg.senderId === currentUserId && msg.receiverId === userId ||
+                    msg.senderId === userId && msg.receiverId === currentUserId) {
                     const formattedMessage = {
                         id: msg.id,
                         content: msg.content,

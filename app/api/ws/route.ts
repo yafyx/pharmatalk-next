@@ -1,29 +1,37 @@
-import { NextApiRequest } from 'next';
-import { createServer } from 'http';
+import { NextRequest } from 'next/server';
+import { createServer, IncomingMessage } from 'http';
 import { parse } from 'url';
 import { initWebSocket } from '@/lib/websocket';
+import { Duplex } from 'stream';
 
 const server = createServer();
 const wss = initWebSocket(server);
 
-export default function handler(req: NextApiRequest) {
-    const { socket: ws } = req;
+export async function GET(req: NextRequest) {
+    const upgrade = req.headers.get('upgrade');
+    const socket = Reflect.get(req, 'socket');
 
-    if (!ws) {
-        return new Response('Expected Upgrade header', { status: 426 });
+    if (!upgrade || upgrade.toLowerCase() !== 'websocket') {
+        return new Response('Expected Upgrade: WebSocket', { status: 426 });
+    }
+
+    if (!socket) {
+        return new Response('Expected WebSocket connection', { status: 400 });
     }
 
     try {
         const { pathname } = parse(req.url || '');
         if (pathname === '/api/ws') {
-            wss.handleUpgrade(req, ws, Buffer.alloc(0), (ws) => {
+            wss.handleUpgrade(req as unknown as IncomingMessage, socket as Duplex, Buffer.alloc(0), (ws) => {
                 wss.emit('connection', ws, req);
             });
         }
     } catch (e) {
         console.error('WebSocket upgrade error:', e);
-        ws.end('HTTP/1.1 500 Internal Server Error\r\n\r\n');
+        return new Response('Internal Server Error', { status: 500 });
     }
+
+    return new Response(null);
 }
 
 export const config = {

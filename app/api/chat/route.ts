@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { connections } from "./stream/[userId]/route";
+import { connections } from "@/lib/chat-connections";
 import { ChatMessage } from "@prisma/client";
 import { sendMessage } from "@/lib/websocket";
 
