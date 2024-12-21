@@ -19,7 +19,13 @@ export async function GET(
             const send = (msg: ChatMessage) => {
                 if (msg.senderId === currentUserId && msg.receiverId === params.userId ||
                     msg.senderId === params.userId && msg.receiverId === currentUserId) {
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(msg)}\n\n`));
+                    const formattedMessage = {
+                        id: msg.id,
+                        content: msg.content,
+                        sender: msg.senderId === currentUserId ? "user" : "other",
+                        timestamp: msg.createdAt.toLocaleTimeString(),
+                    };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(formattedMessage)}\n\n`));
                 }
             };
 
@@ -47,5 +53,3 @@ export async function GET(
         },
     });
 }
-
-export { connections };
