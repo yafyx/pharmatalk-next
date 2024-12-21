@@ -96,7 +96,13 @@ export function Chat() {
       if (!selectedContact) return;
       try {
         const res = await fetch(`/api/chat/messages/${selectedContact.id}`);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
         setMessages(data);
       } catch (error) {
         console.error("Error fetching messages:", error);
