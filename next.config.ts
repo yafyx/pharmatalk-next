@@ -3,18 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'randomuser.me',
-      },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'placehold.co' },
+      { protocol: 'https', hostname: 'randomuser.me' },
     ],
   },
   webpack: (config, { isServer }) => {
@@ -26,6 +17,14 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        bufferutil: "bufferutil",
+        "utf-8-validate": "utf-8-validate"
+      }
+    }
+  }
 };
 
 export default nextConfig;

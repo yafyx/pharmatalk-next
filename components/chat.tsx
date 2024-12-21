@@ -14,12 +14,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUser } from "@clerk/nextjs";
+import { cn } from "@/lib/utils";
 
 interface Message {
   id: number;
   content: string;
   timestamp: string;
   sender: "user" | "other";
+  pending?: boolean;
 }
 
 interface Contact {
@@ -170,6 +172,7 @@ export function Chat() {
       content: inputValue,
       timestamp: new Date().toLocaleTimeString(),
       sender: "user" as const,
+      pending: true,
     };
 
     setMessages((prev) => [...prev, tempMessage]);
@@ -204,11 +207,28 @@ export function Chat() {
           content: inputValue,
         }),
       });
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempMessage.id ? { ...msg, pending: false } : msg
+        )
+      );
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
     }
   }
+
+  const handleSendMessage = async () => {
+    if (!selectedContact || !inputValue.trim() || !user) return;
+    await sendMessage();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -318,15 +338,17 @@ export function Chat() {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${
+                      className={cn(
+                        "flex transition-all duration-200 ease-in-out",
                         message.sender === "user"
                           ? "justify-end"
-                          : "justify-start"
-                      }`}
+                          : "justify-start",
+                        message.pending && "opacity-70"
+                      )}
                     >
-                      <div className="flex items-end gap-2">
+                      <div className="flex items-end gap-2 max-w-[80%]">
                         {message.sender === "other" && (
-                          <Avatar className="w-8 h-8">
+                          <Avatar className="w-8 h-8 shrink-0">
                             <AvatarImage src={selectedContact.avatar} />
                             <AvatarFallback>
                               {selectedContact.name
@@ -337,19 +359,35 @@ export function Chat() {
                           </Avatar>
                         )}
                         <div
-                          className={`rounded-lg px-4 py-2 max-w-md ${
+                          className={cn(
+                            "rounded-2xl px-4 py-2 shadow-sm",
                             message.sender === "user"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}
+                              ? "bg-blue-600 text-white rounded-br-none"
+                              : "bg-gray-100 dark:bg-gray-800 rounded-bl-none",
+                            "transform transition-all duration-200 hover:scale-[1.02]"
+                          )}
                         >
-                          <p className="text-sm">{message.content}</p>
-                          <p className="text-xs mt-1 opacity-70">
+                          <p className="text-sm whitespace-pre-wrap break-words">
+                            {message.content}
+                            {message.pending && (
+                              <span className="ml-2 inline-block">
+                                <span className="animate-pulse">...</span>
+                              </span>
+                            )}
+                          </p>
+                          <p
+                            className={cn(
+                              "text-xs mt-1",
+                              message.sender === "user"
+                                ? "text-white/70" // Changed from text-primary-foreground
+                                : "text-gray-500 dark:text-gray-400" // Changed from text-muted-foreground
+                            )}
+                          >
                             {message.timestamp}
                           </p>
                         </div>
                         {message.sender === "user" && (
-                          <Avatar className="w-8 h-8">
+                          <Avatar className="w-8 h-8 shrink-0">
                             <AvatarImage src="/placeholder.svg" />
                             <AvatarFallback>ME</AvatarFallback>
                           </Avatar>
@@ -367,11 +405,16 @@ export function Chat() {
                     className="flex-1"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyPress}
                   />
                   <Button variant="ghost" size="icon">
                     <Smile className="h-5 w-5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={sendMessage}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleSendMessage}
+                  >
                     <Send className="h-5 w-5" />
                   </Button>
                 </div>
