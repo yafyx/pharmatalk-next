@@ -85,9 +85,11 @@ const features: FeatureCard[] = [
 export const Showcase = () => {
   return (
     <>
-      <div className="py-16 md:py-24 bg-white relative overflow-hidden">
+      <div className="py-16 md:py-12 bg-white relative overflow-hidden">
         <div className="container mx-auto">
-          <div className="flex overflow-hidden w-full max-w-6xl mx-auto">
+          <div className="flex overflow-hidden w-full max-w-6xl mx-auto relative">
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10" />
+
             <motion.div
               animate={{
                 translateX: "-50%",
@@ -145,6 +147,8 @@ export const Showcase = () => {
                 </motion.div>
               ))}
             </motion.div>
+
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
           </div>
         </div>
       </div>
