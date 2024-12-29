@@ -19,6 +19,7 @@ import {
   Pill,
   Building2,
   LucideIcon,
+  MessageSquare,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function Navbar() {
 
   const authenticatedLinks = [
     { name: "Beranda", href: "/dashboard", icon: Home },
+    { name: "Chat", href: "/chat", icon: MessageSquare },
     { name: "Artikel", href: "/artikel", icon: Newspaper },
     { name: "Cari Obat", href: "/cari-obat", icon: Pill },
     { name: "Cari Apotek", href: "/cari-apotek", icon: Building2 },

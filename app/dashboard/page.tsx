@@ -5,22 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
-import {
-  Search,
-  MessageSquare,
-  ArrowRight,
-  Navigation,
-  MapPin,
-} from "lucide-react";
+import { Search, ArrowRight, Navigation, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Chat } from "@/components/chat";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 // import "leaflet/dist/leaflet.css";
 
@@ -52,7 +43,6 @@ export default function Dashboard() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [data, setData] = useState<DashboardData>({
     articles: [],
     medicines: [],
@@ -106,14 +96,6 @@ export default function Dashboard() {
               Selamat datang kembali di PharmaTalk
             </p>
           </div>
-          <Button
-            className="w-full sm:w-auto font-medium"
-            variant="secondary"
-            onClick={() => setIsChatOpen(!isChatOpen)}
-          >
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Live Chat
-          </Button>
         </div>
 
         <Card className="border shadow-sm">
@@ -317,13 +299,6 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-
-        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-          <DialogTitle></DialogTitle>
-          <DialogContent className="max-w-4xl h-[80vh]">
-            <Chat />
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
