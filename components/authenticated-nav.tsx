@@ -4,14 +4,40 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { Home, Newspaper, Pill, Building2, MessageSquare } from "lucide-react";
+import {
+  Home,
+  Newspaper,
+  Pill,
+  Building2,
+  MessageSquare,
+  HomeIcon,
+  NewspaperIcon,
+  PillIcon,
+  Building2Icon,
+  MessageSquareIcon,
+} from "lucide-react";
 
 const authenticatedLinks = [
-  { name: "Beranda", href: "/dashboard", icon: Home },
-  { name: "Chat", href: "/chat", icon: MessageSquare },
-  { name: "Artikel", href: "/artikel", icon: Newspaper },
-  { name: "Cari Obat", href: "/cari-obat", icon: Pill },
-  { name: "Cari Apotek", href: "/cari-apotek", icon: Building2 },
+  { name: "Beranda", href: "/dashboard", icon: Home, iconFilled: HomeIcon },
+  {
+    name: "Chat",
+    href: "/chat",
+    icon: MessageSquare,
+    iconFilled: MessageSquareIcon,
+  },
+  {
+    name: "Artikel",
+    href: "/artikel",
+    icon: Newspaper,
+    iconFilled: NewspaperIcon,
+  },
+  { name: "Cari Obat", href: "/cari-obat", icon: Pill, iconFilled: PillIcon },
+  {
+    name: "Cari Apotek",
+    href: "/cari-apotek",
+    icon: Building2,
+    iconFilled: Building2Icon,
+  },
 ];
 
 export function AuthenticatedNav() {
@@ -37,13 +63,12 @@ export function AuthenticatedNav() {
                     : "text-gray-500 hover:text-foreground hover:bg-gray-50"
                 }`}
               >
-                {link.icon && (
-                  <link.icon
-                    className={`h-5 w-5 transition-all duration-200 ease-in-out ${
-                      isActiveLink(link.href) ? "scale-110" : ""
-                    }`}
-                  />
-                )}
+                {link.icon &&
+                  (isActiveLink(link.href) ? (
+                    <link.iconFilled className="h-5 w-5 transition-all duration-200 ease-in-out scale-110" />
+                  ) : (
+                    <link.icon className="h-5 w-5 transition-all duration-200 ease-in-out" />
+                  ))}
                 <span
                   className={`text-xs transition-all duration-200 ease-in-out ${
                     isActiveLink(link.href) ? "font-medium" : ""
