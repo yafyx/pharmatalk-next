@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -10,6 +11,12 @@ import SocialLinkedin from "@/public/assets/social-linkedin.svg";
 import SocialYoutube from "@/public/assets/social-youtube.svg";
 
 export const Footer = () => {
+  const { isSignedIn } = useAuth();
+
+  if (isSignedIn) {
+    return null;
+  }
+
   const handleClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     href: string
