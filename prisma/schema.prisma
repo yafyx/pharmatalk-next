@@ -17,7 +17,7 @@ model Artikel {
   id        String   @id @default(cuid()) @map("_id")
   title     String   @unique
   slug      String   @unique
-  content   String
+  content   String   @db.String
   image     String?
   category  String?
   author    User     @relation(fields: [authorId], references: [id])

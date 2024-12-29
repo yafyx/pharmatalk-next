@@ -44,3 +44,31 @@ export async function GET(
         );
     }
 }
+
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: Promise<{ slug: string }> }
+) {
+    try {
+        const { slug } = await params;
+        const { title, content } = await request.json();
+
+        // No auth check needed for now
+        const article = await prisma.artikel.update({
+            where: { slug },
+            data: {
+                title,
+                content,
+                updatedAt: new Date(),
+            },
+        });
+
+        return NextResponse.json(article);
+    } catch (error) {
+        console.error('Failed to update article:', error);
+        return NextResponse.json(
+            { error: 'Failed to update article' },
+            { status: 500 }
+        );
+    }
+}
