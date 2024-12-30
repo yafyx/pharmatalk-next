@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect } from "react";
-import { motion, useAnimation, useInView } from "framer-motion";
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import Marquee from "@/components/ui/marquee";
+import { cn } from "@/lib/utils";
 
 import avatar1 from "@/public/assets/testimonial/avatar-1.png";
 import avatar2 from "@/public/assets/testimonial/avatar-2.png";
@@ -75,145 +76,94 @@ const firstColumn = testimonials.slice(0, 3);
 const secondColumn = testimonials.slice(3, 6);
 const thirdColumn = testimonials.slice(6, 9);
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const fadeInUpTransition = {
-  duration: 0.6,
-};
-
-const TestimonialsColumn = (props: {
-  className?: string;
-  testimonials: typeof testimonials;
-  duration?: number;
-}) => {
-  return (
-    <motion.div
-      animate={{ opacity: 1 }}
-      className={`${props.className} relative`}
-      initial={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <motion.div
-        animate={{
-          translateY: "-50%",
-        }}
-        className="flex flex-col gap-6 pb-6"
-        transition={{
-          duration: props.duration || 10,
-          repeat: Infinity,
-          ease: "linear",
-          repeatType: "loop",
-        }}
-      >
-        {[
-          ...new Array(2).fill(0).map((_, index) => (
-            <React.Fragment key={index}>
-              {props.testimonials.map(({ text, imageSrc, name, role }, idx) => (
-                <motion.div
-                  key={`${name}-${role}-${idx}`}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: idx * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                >
-                  <Card className="relative bg-white/90 backdrop-blur-lg border border-gray-100 shadow-lg">
-                    <CardContent className="p-6">
-                      <p className="text-gray-700 relative">{text}</p>
-                      <div className="flex items-center gap-3 mt-4">
-                        <Avatar>
-                          <AvatarImage alt={name} src={imageSrc} />
-                          <AvatarFallback>{name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-900 text-sm">
-                            {name}
-                          </span>
-                          <span className="text-gray-500 text-sm">{role}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </React.Fragment>
-          )),
-        ]}
-      </motion.div>
-    </motion.div>
-  );
-};
+const TestimonialCard = ({
+  text,
+  imageSrc,
+  name,
+  role,
+}: {
+  text: string;
+  imageSrc: string;
+  name: string;
+  role: string;
+}) => (
+  <Card
+    className={cn(
+      "relative bg-white/90 backdrop-blur-lg border border-gray-100 shadow-lg m-2"
+    )}
+  >
+    <CardContent className="p-6">
+      <p className="text-gray-700 relative">{text}</p>
+      <div className="flex items-center gap-3 mt-4">
+        <Avatar>
+          <AvatarImage alt={name} src={imageSrc} />
+          <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="font-medium text-gray-900 text-sm">{name}</span>
+          <span className="text-gray-500 text-sm">{role}</span>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
 export const Testimonials = () => {
-  const controls = useAnimation();
-  const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [controls, isInView]);
-
   return (
     <section className="bg-gradient-to-b from-white via-gray-50 to-[#e6f5ed] py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,#e6f5ed,transparent)]" />
 
       <div className="container mx-auto px-4 max-w-7xl relative">
-        <motion.div
-          ref={ref}
-          animate={controls}
-          className="text-center"
-          initial="hidden"
-          transition={{ duration: 0.6 }}
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0 },
-          }}
-        >
-          <motion.div
-            className="flex justify-center"
-            transition={fadeInUpTransition}
-            variants={fadeInUp}
-          >
+        <div className="text-center">
+          <div className="flex justify-center">
             <div className="bg-gradient-to-r from-gray-900 to-gray-700 text-white px-6 py-2 rounded-full text-sm font-medium tracking-wider">
               Testimoni
             </div>
-          </motion.div>
+          </div>
 
-          <motion.h2
-            className="mt-8 text-gray-900 text-6xl font-bold tracking-tight"
-            transition={fadeInUpTransition}
-            variants={fadeInUp}
-          >
+          <h2 className="mt-8 text-gray-900 text-6xl font-bold tracking-tight">
             Apa Kata Pengguna Kami
-          </motion.h2>
+          </h2>
 
-          <motion.p
-            className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed"
-            transition={fadeInUpTransition}
-            variants={fadeInUp}
-          >
+          <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
             Dari konsultasi kesehatan online hingga pencarian apotek terdekat,
             platform kami telah membantu pengguna mendapatkan solusi kesehatan
             dengan mudah dan cepat.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
-        <div className="flex justify-center p-4 gap-8 mt-16 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] max-h-[800px] overflow-hidden">
-          <TestimonialsColumn duration={15} testimonials={firstColumn} />
-          <TestimonialsColumn
-            className="hidden md:block"
-            duration={19}
-            testimonials={secondColumn}
-          />
-          <TestimonialsColumn
-            className="hidden lg:block"
-            duration={17}
-            testimonials={thirdColumn}
-          />
+        <div className="flex justify-center gap-8 mt-16 h-[600px] relative">
+          <div className="relative flex h-full w-full flex-row items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none z-10">
+              <div className="absolute top-0 h-32 w-full bg-gradient-to-b from-gray-50 to-transparent"></div>
+              <div className="absolute bottom-0 h-32 w-full bg-gradient-to-t from-[#e6f5ed] to-transparent"></div>
+            </div>
+
+            <Marquee pauseOnHover vertical className="[--duration:20s]">
+              {firstColumn.map((item, idx) => (
+                <TestimonialCard key={`col1-${idx}`} {...item} />
+              ))}
+            </Marquee>
+            <Marquee
+              pauseOnHover
+              vertical
+              className="[--duration:25s] hidden md:block"
+            >
+              {secondColumn.map((item, idx) => (
+                <TestimonialCard key={`col2-${idx}`} {...item} />
+              ))}
+            </Marquee>
+            <Marquee
+              reverse
+              pauseOnHover
+              vertical
+              className="[--duration:22s] hidden lg:block"
+            >
+              {thirdColumn.map((item, idx) => (
+                <TestimonialCard key={`col3-${idx}`} {...item} />
+              ))}
+            </Marquee>
+          </div>
         </div>
       </div>
     </section>
