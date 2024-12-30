@@ -8,7 +8,6 @@ import {
   Newspaper,
   Timer,
   Search,
-  Clock,
   Cross,
 } from "lucide-react";
 
@@ -23,11 +22,52 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { AnimatedList } from "@/components/ui/animated-list";
+import { cn } from "@/lib/utils";
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
+
+const medicines = [
+  {
+    name: "Paracetamol",
+    description: "Obat penurun demam",
+    icon: "💊",
+    color: "#00C9A7",
+  },
+  {
+    name: "Amoxicillin",
+    description: "Antibiotik",
+    icon: "💊",
+    color: "#FFB800",
+  },
+  {
+    name: "Vitamin C",
+    description: "Suplemen",
+    icon: "💊",
+    color: "#1E86FF",
+  },
+  {
+    name: "Ibuprofen",
+    description: "Anti inflamasi",
+    icon: "💊",
+    color: "#FF4B4B",
+  },
+  {
+    name: "Omeprazole",
+    description: "Obat maag",
+    icon: "💊",
+    color: "#9747FF",
+  },
+  {
+    name: "Cetirizine",
+    description: "Anti alergi",
+    icon: "💊",
+    color: "#00BA88",
+  },
+].flatMap((item) => Array(1).fill(item));
 
 const features = [
   {
@@ -84,7 +124,7 @@ const features = [
             </motion.div>
           ))}
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-24 md:h-40 bg-gradient-to-t from-white/90 via-white/50 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-24 md:h-40 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
       </div>
     ),
   },
@@ -99,28 +139,48 @@ const features = [
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 via-transparent to-teal-600/20" />
         <div className="absolute left-6 right-6 top-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 rounded-full bg-white/90 p-2 shadow-lg">
-              <Search className="h-4 w-4 text-teal-500" />
-              <span className="text-sm text-muted-foreground">
-                Cari obat...
-              </span>
-            </div>
-            {["Paracetamol", "Amoxicillin", "Vitamin C"].map((term, i) => (
-              <motion.div
-                key={i}
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: i * 0.2 }}
-                className="flex items-center gap-2 rounded-lg bg-white/80 px-3 py-2"
-              >
-                <Clock className="h-3 w-3 text-teal-500" />
-                <span className="text-xs">{term}</span>
-              </motion.div>
-            ))}
+          <div className="flex items-center gap-2 rounded-full bg-white/90 p-2 shadow-lg mb-4">
+            <Search className="h-4 w-4 text-teal-500" />
+            <span className="text-sm text-muted-foreground">Cari obat...</span>
+          </div>
+          <div className="h-[240px] overflow-hidden">
+            <AnimatedList>
+              {medicines.map((medicine, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "relative mx-auto w-full cursor-pointer overflow-hidden rounded-lg p-2 mb-2",
+                    "transition-all duration-200 ease-in-out hover:scale-[102%]",
+                    "bg-white/90 shadow-sm"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded-lg"
+                      style={{ backgroundColor: medicine.color }}
+                    >
+                      <span className="text-sm">{medicine.icon}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {medicine.name}
+                        </span>
+                        <span className="text-xs text-teal-600">
+                          {medicine.time}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {medicine.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </AnimatedList>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white/90 via-white/50 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
       </div>
     ),
   },
@@ -218,7 +278,7 @@ const features = [
           ))}
           <ScrollBar orientation="vertical" />
         </ScrollArea>
-        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-white/95 via-white/70 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
       </div>
     ),
   },
