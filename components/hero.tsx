@@ -1,82 +1,23 @@
 "use client";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  AnimatePresence,
-} from "framer-motion";
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import pillsDrugImage from "@/public/assets/pillsdrug.png";
+import capsuleImage from "@/public/assets/capsule.png";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-import pillsDrugImage from "@/public/assets/pillsdrug.png";
-import capsuleImage from "@/public/assets/capsule.png";
 import { SignedOut } from "@clerk/nextjs";
-
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 10,
-    },
-  },
-};
-
-// const floatingPillsVariants = {
-//   initial: { y: 0, rotate: 0, scale: 1 },
-//   animate: {
-//     y: [0, -20, 0],
-//     rotate: [-5, 5, -5],
-//     scale: [1, 1.05, 1],
-//     transition: {
-//       duration: 6,
-//       repeat: Infinity,
-//       repeatType: "mirror" as const,
-//       ease: "easeInOut",
-//     },
-//   },
-// };
-
-const backgroundParticleVariants = {
-  animate: (i: number) => ({
-    x: ["50vw", "-10px"],
-    y: [Math.random() * 50, Math.random() * 100],
-    rotate: [0, 360],
-    scale: [1, Math.random() * (1.5 - 0.5) + 0.5],
-    transition: {
-      duration: 5 + Math.random() * 5,
-      repeat: Infinity,
-      delay: i * 0.8,
-      ease: "easeInOut",
-    },
-  }),
-};
-
-const typingAnimation = {
-  animate: (i: number) => ({
-    scale: [1, 1.2, 1],
-    opacity: [0.5, 1, 0.5],
-    transition: {
-      duration: 0.8,
-      repeat: Infinity,
-      delay: i * 0.15,
-      ease: "easeInOut",
-    },
-  }),
-};
+import BlurFade from "@/components/ui/blur-fade";
+import { BorderBeam } from "@/components/ui/border-beam";
+import AnimatedShinyText from "@/components/ui/animated-shiny-text";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 export const Hero = () => {
   const router = useRouter();
-  const [isTyping] = useState(true);
   const [messages] = useState([
     {
       id: 1,
@@ -98,226 +39,194 @@ export const Hero = () => {
       sender: "agent",
       time: "21:13",
       agent: {
-        name: "Dr. Lina",
-        role: "Apoteker Spesialis",
+        name: "Luna",
+        role: "Apoteker",
         avatar: "/assets/pharmacist-avatar.jpg",
         isOnline: true,
       },
     },
   ]);
 
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start end", "end start"],
-  });
-
-  const translateY = useTransform(scrollYProgress, [0, 1], [150, -150]);
+  const headingWords = ["Solusi", "Kesehatan", "Anda"];
 
   return (
-    <motion.section
-      ref={heroRef}
-      animate="visible"
-      className="pt-20 pb-20 md:pt-5 md:pb-10 overflow-x-clip relative bg-gradient-to-br from-[#7FD1AE] via-[#9EDFFF] to-[#E2F4FF]"
-      initial="hidden"
-    >
-      <motion.div className="absolute inset-0 overflow-hidden">
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            custom={i}
-            variants={backgroundParticleVariants}
-            animate="animate"
-            className="absolute w-2 h-2 bg-white/20 rounded-full"
-            initial={{ x: -10, y: Math.random() * 50 }}
-          />
-        ))}
-      </motion.div>
+    <section className="min-h-screen pt-40 pb-20 overflow-hidden relative">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 relative z-10"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+          className="relative rounded-[2.5rem] bg-white/95 border border-gray-300/50 overflow-hidden backdrop-blur-xl p-8 md:p-12"
+        >
+          <DotPattern className="absolute inset-0 h-full w-full text-blue-100/50" />
 
-      <div className="mx-auto max-w-7xl px-4 pb-14 mt-20 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-          <div className="max-w-xl">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.4, duration: 0.8 }}
+            className="absolute top-8 left-8 w-48 h-48 md:w-60 md:h-60 z-10"
+          >
+            <Image
+              src={pillsDrugImage}
+              alt="Pills"
+              className="w-full h-full object-contain drop-shadow-2xl opacity-90"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.8, duration: 0.8 }}
+            className="absolute bottom-8 right-8 w-48 h-48 md:w-60 md:h-60 z-10"
+          >
+            <Image
+              src={capsuleImage}
+              alt="Pills"
+              className="w-full h-full object-contain drop-shadow-2xl opacity-90"
+            />
+          </motion.div>
+
+          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-20 relative">
             <motion.div
-              className="inline-flex rounded-full border border-[#163300] text-[#163300] px-6 py-2 text-sm font-semibold backdrop-blur-sm bg-white/30"
-              transition={{ duration: 0.6 }}
-              variants={fadeUpVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="group border border-gray-300/50 rounded-full bg-white/90 transition-all ease-in hover:bg-white/95"
             >
-              100% Obat Asli
+              <AnimatedShinyText className="inline-flex items-center text-sm font-medium px-6 py-2">
+                <span>✨ 100% Apoteker Bersertifikat</span>
+              </AnimatedShinyText>
             </motion.div>
 
-            <motion.h1
-              className="mt-8 bg-gradient-to-br from-black via-[#163300] to-[#2A5A3C] bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl md:text-6xl lg:text-7xl"
-              transition={{ duration: 0.6, delay: 0.2 }}
-              variants={fadeUpVariants}
-            >
-              PharmaTalk
-            </motion.h1>
+            <div className="mt-8 flex flex-wrap justify-center gap-x-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl md:text-7xl lg:text-8xl">
+              {headingWords.map((word, index) => (
+                <BlurFade key={index} delay={0.2 * (index + 1)} inView>
+                  <span
+                    className={
+                      word === "Anda"
+                        ? "bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600"
+                        : ""
+                    }
+                  >
+                    {word}
+                  </span>
+                </BlurFade>
+              ))}
+            </div>
 
             <motion.p
-              animate={{ opacity: 1 }}
-              className="mt-6 text-lg text-[#010D3E] sm:text-xl"
-              initial={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              className="mt-6 text-lg text-gray-900 font-medium sm:text-xl max-w-2xl"
             >
-              Temukan obat yang tepat dan solusi terbaik untuk kesehatan Anda
-              dengan konsultasi melalui live chat kami.
+              Dapatkan saran obat & vitamin dari apoteker profesional dalam
+              hitungan menit. Aman, terpercaya, dan tersedia 24/7.
             </motion.p>
 
             <motion.div
-              className="mt-8 flex gap-4"
-              transition={{ duration: 0.6, delay: 0.6 }}
-              variants={fadeUpVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              className="mt-10"
             >
               <SignedOut>
                 <Button
-                  className="bg-black text-white hover:scale-105 transition-transform"
-                  color="primary"
+                  className="bg-gradient-to-b from-gray-900 to-gray-700 text-white hover:from-gray-800 hover:to-gray-600 hover:scale-105 transition-all duration-300 shadow-lg"
                   size="lg"
                   onClick={() => router.push("/sign-up")}
                 >
-                  Daftar Gratis
+                  Konsultasi Gratis
                 </Button>
               </SignedOut>
             </motion.div>
           </div>
 
-          <div className="relative h-[400px] md:h-[648px]">
-            <div className="md:absolute md:h-full md:w-auto md:max-w-none md:-left-0 top-10 lg:left-40">
-              <Card className="w-[380px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] bg-white/95 backdrop-blur-md md:ml-20 md:mt-14 rounded-3xl border-0">
-                <CardHeader className="p-4 border-b bg-gradient-to-r from-gray-50 to-white rounded-t-3xl">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
-                        <AvatarImage src="/assets/pharmacist-avatar.jpg" />
-                        <AvatarFallback>L</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h2 className="font-semibold text-black flex items-center gap-2">
-                          Lina
-                          <Badge variant="secondary" className="h-5">
-                            <span className="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse" />
-                            Online
-                          </Badge>
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                          Apoteker Spesialis
-                        </p>
-                      </div>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+            className="max-w-xl mx-auto relative"
+          >
+            <Card className="backdrop-blur-xl bg-white/90 shadow-2xl border-0 rounded-3xl overflow-hidden">
+              <CardHeader className="p-4 bg-white/40">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-white ring-2 ring-blue-100/50">
+                      <AvatarImage src="/assets/pharmacist-avatar.jpg" />
+                      <AvatarFallback>L</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                        Lina
+                        <Badge className="bg-green-100 text-green-700 border-0">
+                          <span className="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse" />
+                          Online
+                        </Badge>
+                      </h2>
+                      <p className="text-sm text-gray-500">Apoteker</p>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white min-h-[400px] rounded-b-3xl">
-                  <AnimatePresence>
-                    {messages.map((message, index) => (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ delay: index * 0.3 }}
-                        className={cn(
-                          "flex gap-3",
-                          message.sender === "user"
-                            ? "justify-end"
-                            : "justify-start"
-                        )}
-                      >
-                        {message.sender === "agent" && (
-                          <div className="flex flex-col space-y-2 max-w-[85%]">
-                            <div className="bg-white p-4 rounded-2xl rounded-tl-none text-sm text-black shadow-md border border-gray-100">
-                              {message.text}
-                              <div className="text-xs text-gray-400 mt-1">
-                                {message.time}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        {message.sender === "user" && (
-                          <div className="bg-[#2563EB] p-4 rounded-2xl rounded-tr-none text-sm max-w-[85%] shadow-md text-white">
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <AnimatePresence>
+                  {messages.map((message, index) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ delay: index * 0.2 }}
+                      className={cn(
+                        "flex gap-3",
+                        message.sender === "user"
+                          ? "justify-end"
+                          : "justify-start"
+                      )}
+                    >
+                      {message.sender === "agent" && (
+                        <div className="flex flex-col space-y-2 max-w-[85%]">
+                          <div className="bg-gray-100 p-4 rounded-2xl rounded-tl-none text-sm text-gray-800 shadow-sm">
                             {message.text}
-                            <div className="text-xs text-blue-100 mt-1 flex items-center justify-end gap-1">
+                            <div className="text-xs text-gray-400 mt-1">
                               {message.time}
-                              {message.status === "read" && (
-                                <span className="text-blue-100">✓✓</span>
-                              )}
                             </div>
                           </div>
-                        )}
-                      </motion.div>
-                    ))}
-                    {isTyping && (
-                      <motion.div className="flex gap-2 px-4 py-2 w-16 bg-gray-100 rounded-full ml-2">
-                        {[...Array(3)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            custom={i}
-                            variants={typingAnimation}
-                            animate="animate"
-                            className="w-2 h-2 bg-gray-400 rounded-full"
-                          />
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </CardContent>
-              </Card>
-            </div>
-
-            <motion.div
-              animate={{
-                y: [0, -15, 0],
-                rotate: [-3, 3, -3],
-                scale: [1, 1.02, 1],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-              }}
-              className="absolute -left-40 top-10 hidden md:block"
-              style={{ translateY }}
-            >
-              <Image
-                alt="Pills image"
-                height={250}
-                loading="lazy"
-                quality={75}
-                src={pillsDrugImage}
-                width={250}
+                        </div>
+                      )}
+                      {message.sender === "user" && (
+                        <div className="bg-blue-500 p-4 rounded-2xl rounded-tr-none text-sm max-w-[85%] shadow-sm text-white">
+                          {message.text}
+                          <div className="text-xs text-blue-100 mt-1 flex items-center justify-end gap-1">
+                            {message.time}
+                            {message.status === "read" && (
+                              <span className="text-blue-100">✓✓</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </CardContent>
+              <BorderBeam
+                size={250}
+                duration={12}
+                delay={9}
+                colorFrom="#3B82F6"
+                colorTo="#93C5FD"
+                borderWidth={3.5}
               />
-            </motion.div>
-
-            <motion.div
-              animate={{
-                y: [0, 20, 0],
-                rotate: [30, 40, 30],
-                scale: [1, 0.95, 1],
-              }}
-              transition={{
-                duration: 7,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-              }}
-              className="absolute right-0 top-[524px] hidden lg:block"
-              style={{
-                rotate: 30,
-                translateY,
-              }}
-            >
-              <Image
-                alt="Capsule image"
-                height={220}
-                loading="lazy"
-                quality={75}
-                src={capsuleImage}
-                width={220}
-              />
-            </motion.div>
-          </div>
-        </div>
-      </div>
-    </motion.section>
+            </Card>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </section>
   );
 };
