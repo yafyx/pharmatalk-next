@@ -21,6 +21,10 @@ interface User {
   name: string;
   email: string;
   role: "USER" | "ADMIN" | "APOTEKER" | "DOKTER";
+  clerkId: string;
+  image: string | null;
+  lastSeen: Date | null;
+  createdAt: Date;
 }
 
 interface UserDialogProps {
@@ -60,7 +64,14 @@ export function UserDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ ...formData, id: user?.id });
+    onSave({
+      ...formData,
+      id: user?.id,
+      clerkId: "",
+      image: null,
+      lastSeen: null,
+      createdAt: new Date(),
+    });
   };
 
   return (
@@ -92,7 +103,7 @@ export function UserDialog({
             />
           </div>
           <div className="space-y-2">
-            <label>Peran</label>
+            <label>Role</label>
             <Select
               value={formData.role}
               onValueChange={(
