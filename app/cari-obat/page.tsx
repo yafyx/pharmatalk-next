@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { Search, Plus, Edit, Trash2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import ObatForm from "@/components/obat/obat-form";
 
 interface Medicine {
   id: string;
@@ -27,6 +28,8 @@ interface Medicine {
   warning?: string;
   composition?: string;
   manufacturer?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default function CariObatPage() {
@@ -35,6 +38,13 @@ export default function CariObatPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(
+    null
+  );
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [medicineToEdit, setMedicineToEdit] = useState<Medicine | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [medicineToDelete, setMedicineToDelete] = useState<Medicine | null>(
     null
   );
 
@@ -74,6 +84,29 @@ export default function CariObatPage() {
     )}&background=e2e8f0&color=1e293b&size=200&font-size=0.1&length=20&bold=true`;
   };
 
+  const handleDelete = async (medicine: Medicine) => {
+    setMedicineToDelete(medicine);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!medicineToDelete) return;
+
+    try {
+      const response = await fetch(`/api/obat?id=${medicineToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setMedicines(medicines.filter((m) => m.id !== medicineToDelete.id));
+        setIsDeleteConfirmOpen(false);
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to delete medicine:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto py-8 px-4 mt-20">
@@ -105,8 +138,11 @@ export default function CariObatPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 mt-20">
+    <div className="max-w-7xl mx-auto py-8 px-4 mt-20 mb-20">
       <h1 className="text-4xl font-bold mb-8 text-primary">Cari Obat</h1>
+      <Button onClick={() => setIsAddModalOpen(true)} className="mb-4">
+        <Plus className="mr-2" /> Tambah Obat
+      </Button>
       <div className="mb-8 relative w-full max-w-2xl mx-auto">
         <Input
           placeholder="Masukkan nama obat yang ingin dicari..."
@@ -144,11 +180,89 @@ export default function CariObatPage() {
                 <p className="text-primary font-bold">
                   {formatPrice(medicine.price)}
                 </p>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMedicineToEdit(medicine);
+                    setIsEditModalOpen(true);
+                  }}
+                >
+                  <Edit className="mr-2" /> Edit
+                </Button>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tambah Obat Baru</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <ObatForm
+              onSubmit={async (data) => {
+                try {
+                  const response = await fetch("/api/obat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                  });
+                  if (response.ok) {
+                    setIsAddModalOpen(false);
+                    // Refresh medicines list
+                    const newData = await fetch("/api/obat").then((res) =>
+                      res.json()
+                    );
+                    if (newData.success) {
+                      setMedicines(newData.data);
+                    }
+                  }
+                } catch (error) {
+                  console.error("Failed to add medicine:", error);
+                }
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Obat</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {medicineToEdit && (
+              <ObatForm
+                initialData={medicineToEdit}
+                onSubmit={async (data) => {
+                  try {
+                    const response = await fetch(`/api/obat`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ id: medicineToEdit.id, ...data }),
+                    });
+                    if (response.ok) {
+                      setIsEditModalOpen(false);
+                      // Refresh medicines list
+                      const newData = await fetch("/api/obat").then((res) =>
+                        res.json()
+                      );
+                      if (newData.success) {
+                        setMedicines(newData.data);
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Failed to update medicine:", error);
+                  }
+                }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -257,13 +371,41 @@ export default function CariObatPage() {
             </>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex justify-between">
+            <Button
+              variant="destructive"
+              onClick={() => handleDelete(selectedMedicine!)}
+              className="w-full sm:w-auto"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Hapus
+            </Button>
             <Button
               variant="outline"
               onClick={() => setIsModalOpen(false)}
               className="w-full sm:w-auto"
             >
               Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Hapus</DialogTitle>
+          </DialogHeader>
+          <p>Apakah Anda yakin ingin menghapus obat ini?</p>
+          <DialogFooter className="flex gap-2 mt-4">
+            <Button variant="destructive" onClick={confirmDelete}>
+              Hapus
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteConfirmOpen(false)}
+            >
+              Batal
             </Button>
           </DialogFooter>
         </DialogContent>
