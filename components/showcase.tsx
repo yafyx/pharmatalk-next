@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import {
   Stethoscope,
@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AnimatedList } from "@/components/ui/animated-list";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -285,11 +286,55 @@ const features = [
 ];
 
 export const Showcase = () => {
+  const containerRef = React.useRef(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+
+  const containerAnimation = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const childAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
   return (
     <>
-      <div className="py-16 md:py-12 bg-white relative overflow-hidden">
+      <motion.div
+        ref={containerRef}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={containerAnimation}
+        className="py-16 md:py-12 bg-white relative overflow-hidden"
+      >
         <div className="container mx-auto">
-          <div className="flex overflow-hidden w-full max-w-6xl mx-auto relative">
+          <motion.div variants={childAnimation} className="mb-12 text-center">
+            <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
+              Tanya Obat dengan Jaminan Kualitas
+            </h3>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Dapatkan informasi obat terpercaya dari perusahaan farmasi
+              terkemuka dunia dengan standar kualitas internasional
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={childAnimation}
+            className="flex overflow-hidden w-full max-w-6xl mx-auto relative"
+          >
             <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10" />
 
             <motion.div
@@ -341,23 +386,27 @@ export const Showcase = () => {
             </motion.div>
 
             <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
-      <section className="bg-gradient-to-b from-[#FFFFFF] via-[#E3F2FF] to-[#9EDFFF] py-24 md:py-40 overflow-hidden relative">
+      <motion.section
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={containerAnimation}
+        className="bg-gradient-to-b from-[#FFFFFF] via-[#E3F2FF] to-[#9EDFFF] py-24 md:py-40 overflow-hidden relative"
+      >
         <div className="container px-4 mx-auto relative z-10">
           <motion.div
             className="max-w-[720px] mx-auto mb-20"
-            initial="hidden"
-            animate="visible"
+            variants={childAnimation}
           >
             <motion.div className="flex justify-center" variants={itemVariants}>
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur-lg opacity-20" />
                 <div className="relative px-8 py-3 bg-white/90 backdrop-blur rounded-full shadow-xl">
                   <span className="text-gray-800 font-medium">
-                    Kesehatan Anda Prioritas Kami
+                    Solusi Kesehatan Digital Terpercaya
                   </span>
                 </div>
               </div>
@@ -367,26 +416,28 @@ export const Showcase = () => {
               className="text-center text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mt-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600"
               variants={itemVariants}
             >
-              Solusi Kesehatan Terpercaya
+              Konsultasi Kesehatan Lebih Mudah & Terpercaya
             </motion.h2>
 
             <motion.p
               className="text-center text-gray-700 text-xl mt-6"
               variants={itemVariants}
             >
-              Dapatkan layanan konsultasi kesehatan dan informasi obat
-              terlengkap untuk memenuhi kebutuhan kesehatan Anda dengan mudah
-              dan cepat.
+              Hubungkan Anda dengan tenaga medis profesional, temukan informasi
+              obat terlengkap, dan dapatkan solusi kesehatan yang tepat dalam
+              genggaman Anda.
             </motion.p>
           </motion.div>
 
-          <BentoGrid>
-            {features.map((feature, idx) => (
-              <BentoCard key={idx} {...feature} />
-            ))}
-          </BentoGrid>
+          <motion.div variants={childAnimation}>
+            <BentoGrid>
+              {features.map((feature, idx) => (
+                <BentoCard key={idx} {...feature} />
+              ))}
+            </BentoGrid>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
     </>
   );
 };
