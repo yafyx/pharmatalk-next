@@ -21,9 +21,25 @@ export function ArticleEditForm({
   onCancel,
   onSave,
 }: ArticleEditFormProps) {
-  const [title, setTitle] = useState(article.title);
-  const [content, setContent] = useState(article.content);
+  const [formState, setFormState] = useState({
+    title: article.title,
+    content: article.content,
+  });
   const [isSaving, setIsSaving] = useState(false);
+
+  const handleContentChange = (newContent: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      content: newContent,
+    }));
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormState((prev) => ({
+      ...prev,
+      title: e.target.value,
+    }));
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,7 +49,7 @@ export function ArticleEditForm({
       const res = await fetch(`/api/artikel/${article.slug}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify(formState),
       });
 
       if (!res.ok) throw new Error("Failed to save");
@@ -54,20 +70,23 @@ export function ArticleEditForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={formState.title}
+        onChange={handleTitleChange}
         placeholder="Article title"
         className="text-2xl font-bold"
       />
 
-      <ArtikelEditor content={content} onChange={setContent} />
+      <ArtikelEditor
+        content={formState.content}
+        onChange={handleContentChange}
+      />
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          Batal
         </Button>
         <Button type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving ? "Menyimpan..." : "Simpan"}
         </Button>
       </div>
     </form>

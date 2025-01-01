@@ -69,7 +69,7 @@ export default async function ArtikelPage({ params }: PageProps) {
           )}
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
-          Kembali ke Artikel
+          Kembali
         </Link>
 
         <ArticleContent article={article} />

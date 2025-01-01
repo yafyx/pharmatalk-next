@@ -1,6 +1,6 @@
 {
   "name": "pharmatalk-next",
-  "version": "0.1.0",
+  "version": "2.0",
   "private": true,
   "scripts": {
     "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
@@ -23,6 +23,12 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
     "@tailwindcss/typography": "^0.5.15",
+    "@tiptap/extension-code-block": "^2.11.0",
+    "@tiptap/extension-heading": "^2.11.0",
+    "@tiptap/extension-image": "^2.11.0",
+    "@tiptap/extension-link": "^2.11.0",
+    "@tiptap/extension-text-align": "^2.11.0",
+    "@tiptap/extension-underline": "^2.11.0",
     "@tiptap/react": "^2.10.4",
     "@tiptap/starter-kit": "^2.10.4",
     "@types/ws": "^8.5.13",
