@@ -12,7 +12,7 @@ export const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Pharmatalk",
+  title: "PharmaTalk",
   description:
     "Temukan obat yang tepat dan solusi terbaik untuk kesehatan Anda",
 };
