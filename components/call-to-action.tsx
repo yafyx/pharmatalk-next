@@ -47,8 +47,8 @@ export const CallToAction = () => {
     },
     {
       icon: <UserCheck className="w-6 h-6" />,
-      title: "Dokter Terpercaya",
-      description: "Tim dokter professional berpengalaman",
+      title: "Tenaga Medis Terpercaya",
+      description: "Tim tenaga medis professional berpengalaman",
     },
     {
       icon: <Shield className="w-6 h-6" />,
@@ -120,8 +120,9 @@ export const CallToAction = () => {
               className="text-lg text-gray-700 mb-8 leading-relaxed"
               variants={itemVariants}
             >
-              Dapatkan akses ke dokter terpercaya 24/7, konsultasi kesehatan
-              yang aman, dan panduan kesehatan personal untuk Anda dan keluarga.
+              Dapatkan akses ke tenaga medis terpercaya 24/7, konsultasi
+              kesehatan yang aman, dan panduan kesehatan personal untuk Anda dan
+              keluarga.
             </motion.p>
 
             <SignedOut>
@@ -148,7 +149,7 @@ export const CallToAction = () => {
                   ✓ Gratis Pendaftaran
                   <br />
                   ✓ Konsultasi Langsung
-                  <br />✓ Dokter Berpengalaman
+                  <br />✓ Tenaga Medis Berpengalaman
                 </p>
               </motion.div>
             </SignedOut>
