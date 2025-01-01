@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { SignedOut } from "@clerk/nextjs";
 import { Clock, Shield, UserCheck } from "lucide-react";
+import { FAQ } from "@/components/faq";
 
 export const CallToAction = () => {
   const router = useRouter();
@@ -94,76 +95,89 @@ export const CallToAction = () => {
       </div>
 
       <motion.div
-        className="container mx-auto px-4 max-w-5xl relative z-10"
+        className="container mx-auto px-4 max-w-7xl relative z-10"
         initial="hidden"
         variants={containerVariants}
         viewport={{ once: true }}
         whileInView="visible"
       >
-        <div className="section-heading text-center">
-          <motion.span
-            className="inline-block px-4 py-2 rounded-full bg-emerald-100 text-emerald-800 text-sm font-medium mb-4"
+        <div className="grid lg:grid-cols-2 gap-16 items-center mb-32">
+          <div>
+            <motion.span
+              className="inline-block px-4 py-2 rounded-full bg-emerald-100 text-emerald-800 text-sm font-medium mb-4"
+              variants={itemVariants}
+            >
+              Mulai Perjalanan Sehat Anda
+            </motion.span>
+            <motion.h2
+              className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight leading-tight"
+              variants={itemVariants}
+            >
+              Konsultasi Kesehatan{" "}
+              <span className="text-emerald-600">Kapanpun</span> Anda Butuhkan
+            </motion.h2>
+            <motion.p
+              className="text-lg text-gray-700 mb-8 leading-relaxed"
+              variants={itemVariants}
+            >
+              Dapatkan akses ke dokter terpercaya 24/7, konsultasi kesehatan
+              yang aman, dan panduan kesehatan personal untuk Anda dan keluarga.
+            </motion.p>
+
+            <SignedOut>
+              <motion.div
+                className="flex flex-col sm:flex-row items-start gap-4"
+                variants={itemVariants}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="lg"
+                    className="px-8 h-14 text-lg font-semibold rounded-2xl
+                    bg-emerald-600 hover:bg-emerald-700 text-white
+                    shadow-lg hover:shadow-emerald-500/30
+                    transition-all duration-300"
+                    onClick={() => router.push("/sign-up")}
+                  >
+                    Daftar Sekarang
+                  </Button>
+                </motion.div>
+                <p className="text-sm text-gray-600 mt-2 sm:mt-4">
+                  ✓ Gratis Pendaftaran
+                  <br />
+                  ✓ Konsultasi Langsung
+                  <br />✓ Dokter Berpengalaman
+                </p>
+              </motion.div>
+            </SignedOut>
+          </div>
+
+          <motion.div
+            className="grid grid-cols-2 gap-6"
             variants={itemVariants}
           >
-            Mulai Perjalanan Sehat Anda
-          </motion.span>
-          <motion.h2
-            className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight"
-            variants={itemVariants}
-          >
-            Daftar Gratis Sekarang
-          </motion.h2>
-          <motion.p
-            className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed mb-12"
-            variants={itemVariants}
-          >
-            Dapatkan konsultasi kesehatan dari dokter terpercaya kapanpun dan
-            dimanapun Anda berada secara mudah dan aman.
-          </motion.p>
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="bg-white/90 backdrop-blur-sm rounded-2xl p-6
+                hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              >
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </motion.div>
         </div>
 
-        <motion.div
-          className="grid md:grid-cols-3 gap-8 mb-12"
-          variants={itemVariants}
-        >
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 text-center"
-            >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 mb-4">
-                {feature.icon}
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </div>
-          ))}
-        </motion.div>
-
-        <motion.div
-          className="flex flex-col items-center gap-4"
-          variants={itemVariants}
-        >
-          <SignedOut>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                size="lg"
-                className="px-8 h-14 text-lg font-semibold rounded-2xl
-                bg-emerald-600 hover:bg-emerald-700 text-white
-                shadow-[0_0_0_3px_rgba(16,185,129,0.1)]
-                hover:shadow-[0_0_0_3px_rgba(16,185,129,0.2)]
-                transition-all duration-300"
-                onClick={() => router.push("/sign-up")}
-              >
-                Daftar Gratis
-              </Button>
-            </motion.div>
-            <p className="text-sm text-gray-600">
-              Proses pendaftaran cepat • Tanpa biaya • Bisa langsung konsultasi
-            </p>
-          </SignedOut>
+        <motion.div variants={itemVariants} className="mt-32">
+          <FAQ />
         </motion.div>
       </motion.div>
     </section>
