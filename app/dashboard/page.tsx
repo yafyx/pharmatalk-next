@@ -28,17 +28,25 @@ interface Article {
   };
 }
 
-interface Medicine {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  manufacturer: string;
+interface ChatMessage {
+  id: string;
+  content: string;
+  createdAt: string;
+  sender: {
+    name: string;
+    image: string;
+    role: string;
+  };
+  receiver: {
+    name: string;
+    image: string;
+    role: string;
+  };
 }
 
 interface DashboardData {
   articles: Article[];
-  medicines: Medicine[];
+  latestChats: ChatMessage[];
 }
 
 const getImageUrl = (imageUrl: string | null | undefined) => {
@@ -60,7 +68,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<DashboardData>({
     articles: [],
-    medicines: [],
+    latestChats: [],
   });
 
   const getTimeIcon = () => {
@@ -196,38 +204,66 @@ export default function Dashboard() {
             </p>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              { name: "dr. Rahmad Santoso", role: "Dokter Umum" },
-              { name: "dr. Siti Aminah", role: "Dokter Spesialis" },
-              { name: "dr. Budi Prakoso", role: "Dokter Umum" },
-              { name: "dr. Linda Wijaya", role: "Dokter Spesialis" },
-            ].map((member, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between bg-white rounded-lg p-3 hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={`/placeholder.svg`} />
-                    <AvatarFallback>
-                      {member.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{member.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {member.role}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="icon">
-                  <MessageCircle className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
+            {isLoading
+              ? Array(4)
+                  .fill(0)
+                  .map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-white rounded-lg p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-[150px]" />
+                          <Skeleton className="h-3 w-[100px]" />
+                        </div>
+                      </div>
+                      <Skeleton className="h-9 w-9 rounded-lg" />
+                    </div>
+                  ))
+              : data.latestChats
+                  ?.filter(
+                    (chat) =>
+                      chat.sender.role === "DOKTER" ||
+                      chat.receiver.role === "DOKTER"
+                  )
+                  .map((chat) => {
+                    const doctor =
+                      chat.sender.role === "DOKTER"
+                        ? chat.sender
+                        : chat.receiver;
+                    return (
+                      <div
+                        key={chat.id}
+                        className="flex items-center justify-between bg-white rounded-lg p-3 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={doctor.image} />
+                            <AvatarFallback>
+                              {doctor.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{doctor.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {doctor.role === "DOKTER"
+                                ? "Dokter"
+                                : "Dokter Spesialis"}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => router.push(`/chat/${doctor.name}`)}
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
           </CardContent>
         </Card>
 
