@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
 import { ArticleEditForm } from "@/components/artikel-edit";
+import { Protect } from "@clerk/nextjs";
 
 interface Article {
   title: string;
@@ -37,23 +38,32 @@ export function ArticleContent({ article }: ArticleContentProps) {
   return (
     <article className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-6 md:p-10">
       <div className="mb-6">
-        <Button
-          variant={isEditing ? "destructive" : "default"}
-          onClick={() => setIsEditing(!isEditing)}
-          className="gap-2 transition-all hover:scale-105"
+        <Protect
+          condition={(has) =>
+            has({ role: "org:admin" }) ||
+            has({ role: "org:apoteker" }) ||
+            has({ role: "org:dokter" })
+          }
+          fallback={null}
         >
-          {isEditing ? (
-            <>
-              <X className="h-4 w-4" />
-              <span>Batal Edit</span>
-            </>
-          ) : (
-            <>
-              <Edit2 className="h-4 w-4" />
-              <span>Edit Artikel</span>
-            </>
-          )}
-        </Button>
+          <Button
+            variant={isEditing ? "destructive" : "default"}
+            onClick={() => setIsEditing(!isEditing)}
+            className="gap-2 transition-all hover:scale-105"
+          >
+            {isEditing ? (
+              <>
+                <X className="h-4 w-4" />
+                <span>Batal Edit</span>
+              </>
+            ) : (
+              <>
+                <Edit2 className="h-4 w-4" />
+                <span>Edit Artikel</span>
+              </>
+            )}
+          </Button>
+        </Protect>
       </div>
 
       {isEditing ? (

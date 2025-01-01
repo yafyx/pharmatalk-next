@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Protect } from "@clerk/nextjs";
 import type { Artikel } from "@/types/artikel";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,7 +14,6 @@ import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@clerk/nextjs";
 
 const categories = [
   { id: "all", label: "Semua" },
@@ -27,7 +27,6 @@ export default function Articles() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
-  const { userId } = useAuth();
 
   useEffect(() => {
     async function fetchArticles() {
@@ -75,7 +74,14 @@ export default function Articles() {
           </motion.p>
         </div>
 
-        {userId && (
+        <Protect
+          condition={(has) =>
+            has({ role: "org:admin" }) ||
+            has({ role: "org:apoteker" }) ||
+            has({ role: "org:dokter" })
+          }
+          fallback={null}
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -89,7 +95,7 @@ export default function Articles() {
               </Button>
             </Link>
           </motion.div>
-        )}
+        </Protect>
       </div>
 
       <div className="max-w-7xl mx-auto -mt-10 py-6 md:py-12 px-4 relative z-20">
