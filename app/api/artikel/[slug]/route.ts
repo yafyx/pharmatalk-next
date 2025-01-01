@@ -51,14 +51,14 @@ export async function PATCH(
 ) {
     try {
         const { slug } = await params;
-        const { title, content } = await request.json();
+        const { title, content, image } = await request.json();
 
-        // No auth check needed for now
         const article = await prisma.artikel.update({
             where: { slug },
             data: {
                 title,
                 content,
+                image,
                 updatedAt: new Date(),
             },
         });
