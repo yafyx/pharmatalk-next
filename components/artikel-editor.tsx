@@ -97,10 +97,10 @@ export function ArtikelEditor({
   );
 
   return (
-    <div className="border rounded-lg overflow-hidden flex flex-col h-full">
+    <div className="rounded-lg overflow-hidden">
       {editable && (
-        <div className="border-b p-2 flex flex-wrap items-center gap-1 bg-muted/50 sticky top-0 z-10">
-          <div className="flex items-center gap-1">
+        <div className="border-b p-2 flex flex-wrap items-center gap-1.5 bg-white sticky top-0 z-10">
+          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-gray-50">
             <MenuButton
               onClick={() => editor.chain().focus().toggleBold().run()}
               isActive={editor.isActive("bold")}
@@ -123,9 +123,9 @@ export function ArtikelEditor({
             </MenuButton>
           </div>
 
-          <div className="w-px h-6 bg-border mx-2" />
+          <div className="w-px h-6 bg-gray-200 mx-2" />
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-gray-50">
             <MenuButton
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 1 }).run()
@@ -145,9 +145,9 @@ export function ArtikelEditor({
             </MenuButton>
           </div>
 
-          <div className="w-px h-6 bg-border mx-2" />
+          <div className="w-px h-6 bg-gray-200 mx-2" />
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-gray-50">
             <MenuButton
               onClick={() => editor.chain().focus().setTextAlign("left").run()}
               isActive={editor.isActive({ textAlign: "left" })}
@@ -172,9 +172,9 @@ export function ArtikelEditor({
             </MenuButton>
           </div>
 
-          <div className="w-px h-6 bg-border mx-2" />
+          <div className="w-px h-6 bg-gray-200 mx-2" />
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-gray-50">
             <MenuButton
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               isActive={editor.isActive("bulletList")}
@@ -199,11 +199,11 @@ export function ArtikelEditor({
         </div>
       )}
 
-      <div className="flex-grow flex flex-col">
-        <div className="p-4 flex-grow">
+      <div className="flex-grow flex flex-col bg-white">
+        <div className="p-4 flex-grow min-h-[400px]">
           <EditorContent
             editor={editor}
-            className="prose prose-lg max-w-none h-full [&>div]:h-full [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4"
+            className="prose prose-lg max-w-none h-full focus:outline-none [&>div]:h-full [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4"
           />
         </div>
       </div>

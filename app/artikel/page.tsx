@@ -8,10 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@clerk/nextjs";
 
 const categories = [
   { id: "all", label: "Semua" },
@@ -25,6 +27,7 @@ export default function Articles() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+  const { userId } = useAuth();
 
   useEffect(() => {
     async function fetchArticles() {
@@ -71,6 +74,22 @@ export default function Articles() {
             Informasi terpercaya seputar obat-obatan dan dunia kefarmasian
           </motion.p>
         </div>
+
+        {userId && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="absolute bottom-0 right-4 transform translate-y-1/2"
+          >
+            <Link href="/artikel/add">
+              <Button size="lg" className="shadow-lg gap-2">
+                <Plus className="h-5 w-5" />
+                Tulis Artikel
+              </Button>
+            </Link>
+          </motion.div>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto -mt-10 py-6 md:py-12 px-4 relative z-20">
