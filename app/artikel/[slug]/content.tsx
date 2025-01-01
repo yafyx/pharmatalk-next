@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, Edit2, X } from "lucide-react";
@@ -8,7 +9,6 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
 import { ArticleEditForm } from "@/components/artikel-edit";
-import { Protect } from "@clerk/nextjs";
 
 interface Article {
   title: string;
@@ -33,19 +33,25 @@ function calculateReadingTime(content: string): number {
 
 export function ArticleContent({ article }: ArticleContentProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { userId } = useAuth();
   const readingTime = calculateReadingTime(article.content);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      if (userId) {
+        const response = await fetch(`/api/user/role?clerkId=${userId}`);
+        const data = await response.json();
+        setIsAuthorized(["ADMIN", "APOTEKER", "DOKTER"].includes(data.role));
+      }
+    };
+    checkRole();
+  }, [userId]);
 
   return (
     <article className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-6 md:p-10">
       <div className="mb-6">
-        <Protect
-          condition={(has) =>
-            has({ role: "org:admin" }) ||
-            has({ role: "org:apoteker" }) ||
-            has({ role: "org:dokter" })
-          }
-          fallback={null}
-        >
+        {isAuthorized && (
           <Button
             variant={isEditing ? "destructive" : "default"}
             onClick={() => setIsEditing(!isEditing)}
@@ -63,7 +69,7 @@ export function ArticleContent({ article }: ArticleContentProps) {
               </>
             )}
           </Button>
-        </Protect>
+        )}
       </div>
 
       {isEditing ? (

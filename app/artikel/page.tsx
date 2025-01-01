@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Protect } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import type { Artikel } from "@/types/artikel";
 import Link from "next/link";
 import Image from "next/image";
@@ -27,6 +27,8 @@ export default function Articles() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { userId } = useAuth();
 
   useEffect(() => {
     async function fetchArticles() {
@@ -44,6 +46,17 @@ export default function Articles() {
 
     fetchArticles();
   }, []);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      if (userId) {
+        const response = await fetch(`/api/user/role?clerkId=${userId}`);
+        const data = await response.json();
+        setIsAuthorized(["ADMIN", "APOTEKER", "DOKTER"].includes(data.role));
+      }
+    };
+    checkRole();
+  }, [userId]);
 
   const filteredArticles = articles.filter((article) =>
     article.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -74,14 +87,7 @@ export default function Articles() {
           </motion.p>
         </div>
 
-        <Protect
-          condition={(has) =>
-            has({ role: "org:admin" }) ||
-            has({ role: "org:apoteker" }) ||
-            has({ role: "org:dokter" })
-          }
-          fallback={null}
-        >
+        {isAuthorized && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -95,7 +101,7 @@ export default function Articles() {
               </Button>
             </Link>
           </motion.div>
-        </Protect>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto -mt-10 py-6 md:py-12 px-4 relative z-20">
