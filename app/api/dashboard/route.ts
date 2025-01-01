@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const [articles, medicines] = await Promise.all([
+        const [articles] = await Promise.all([
             prisma.artikel.findMany({
                 take: 5,
                 orderBy: {
@@ -13,6 +13,7 @@ export async function GET() {
                     id: true,
                     title: true,
                     slug: true,
+                    image: true,
                     createdAt: true,
                     author: {
                         select: {
@@ -22,24 +23,10 @@ export async function GET() {
                     }
                 }
             }),
-            prisma.obat.findMany({
-                take: 4,
-                orderBy: {
-                    createdAt: 'desc'
-                },
-                select: {
-                    id: true,
-                    name: true,
-                    category: true,
-                    price: true,
-                    manufacturer: true
-                }
-            })
         ]);
 
         return NextResponse.json({
             articles,
-            medicines
         }, { status: 200 });
 
     } catch (error) {

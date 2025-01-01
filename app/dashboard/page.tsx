@@ -6,15 +6,9 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Loader2, ArrowRight } from "lucide-react";
 import { SunIcon, MoonIcon } from "lucide-react";
-import {
-  User,
-  Check,
-  LineChart,
-  ChevronRight,
-  MessageCircle,
-} from "lucide-react";
+import { User, Check, LineChart, MessageCircle } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
+import { CldImage } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +17,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 // import "leaflet/dist/leaflet.css";
 
 interface Article {
-  id: number;
+  id: string; // Changed to string to match MongoDB ID
   title: string;
   slug: string;
+  image: string | null;
   createdAt: string;
   author: {
     name: string;
@@ -45,6 +40,19 @@ interface DashboardData {
   articles: Article[];
   medicines: Medicine[];
 }
+
+const getImageUrl = (imageUrl: string | null | undefined) => {
+  if (!imageUrl)
+    return "https://placehold.co/600x400/e2e8f0/94a3b8?text=No+Image";
+
+  if (imageUrl.includes("cloudinary.com")) {
+    const splitUrl = imageUrl.split("/");
+    const publicId = splitUrl[splitUrl.length - 1].split(".")[0];
+    return publicId;
+  }
+
+  return imageUrl;
+};
 
 export default function Dashboard() {
   const { user, isLoaded } = useUser();
@@ -104,7 +112,7 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted mt-10 mx-auto max-w-3xl">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted mt-10 mx-auto max-w-3xl mb-20">
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 lg:space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 backdrop-blur-sm bg-background/30 p-4 sm:p-6 rounded-2xl border">
           <div className="space-y-1">
@@ -113,8 +121,7 @@ export default function Dashboard() {
               Halo, {user.firstName}!
             </h1>
             <p className="text-muted-foreground">
-              Selamat datang kembali! Temukan informasi kesehatan terbaru dan
-              layanan apotek di sekitar Anda.
+              Kami sangat senang untuk membantu Anda!
             </p>
           </div>
         </div>
@@ -122,44 +129,59 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>Lengkapi Profil Anda</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Selesaikan langkah-langkah berikut untuk mengakses layanan lengkap
-              PhamaTalk:
+              Memastikan informasi kesehatan Anda lengkap untuk memudahkan ahli
+              medis dalam memberikan pelayanan:
             </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[
                 {
-                  icon: User,
-                  text: "Verifikasi Identitas",
+                  icon: ArrowRight,
+                  text: "Selesaikan Onboarding",
                   completed: false,
                 },
-                { icon: Check, text: "Lengkapi Data Diri", completed: false },
-                { icon: Check, text: "Riwayat Kesehatan", completed: true },
+                {
+                  icon: User,
+                  text: "Data Pribadi",
+                  description: "Nama, tanggal lahir, dan kontak darurat",
+                  completed: true,
+                },
+                {
+                  icon: Check,
+                  text: "Riwayat Medis",
+                  description: "Penyakit, alergi, dan obat rutin",
+                  completed: true,
+                },
                 {
                   icon: LineChart,
-                  text: "Data Vital Signs",
+                  text: "Pemeriksaan Terakhir",
+                  description: "Tekanan darah, gula darah, kolesterol",
                   completed: true,
                 },
               ].map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between bg-white rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-4 bg-white rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full border border-primary flex items-center justify-center">
-                      {item.completed && (
-                        <Check className="w-3 h-3 text-primary" />
-                      )}
+                  {item.completed ? (
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
                     </div>
-                    <item.icon className="w-5 h-5 text-muted-foreground" />
-                    <span
-                      className={item.completed ? "text-muted-foreground" : ""}
-                    >
-                      {item.text}
-                    </span>
+                  ) : (
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-gray-300" />
+                  )}
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <item.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">{item.text}</span>
+                      <p className="text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
               ))}
             </div>
@@ -209,17 +231,23 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border shadow-sm">
+        <Card className="border shadow-sm bg-gradient-to-tr from-blue-500/5 via-transparent to-green-500/5">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
             <div className="space-y-1">
-              <CardTitle>Topik Terkini</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                Topik Terkini
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Artikel kesehatan terbaru untuk Anda
+                Artikel kesehatan terbaru untuk meningkatkan wawasan Anda
               </p>
             </div>
-            <Button variant="ghost" onClick={() => router.push("/artikel")}>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/artikel")}
+              className="group transition-all hover:bg-primary"
+            >
               Lihat selengkapnya
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </CardHeader>
           <CardContent>
@@ -228,7 +256,10 @@ export default function Dashboard() {
                 ? Array(2)
                     .fill(0)
                     .map((_, index) => (
-                      <Card key={`skeleton-${index}`}>
+                      <Card
+                        key={`skeleton-${index}`}
+                        className="overflow-hidden border-0 shadow-md"
+                      >
                         <CardContent className="p-4">
                           <Skeleton className="h-48 w-full rounded-lg" />
                           <div className="flex gap-2 mt-4">
@@ -243,37 +274,62 @@ export default function Dashboard() {
                 : data.articles.map((article) => (
                     <Card
                       key={article.id}
-                      className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
+                      className="group cursor-pointer overflow-hidden border-0 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                      onClick={() => router.push(`/artikel/${article.slug}`)}
                     >
                       <CardContent className="p-0">
-                        <div className="relative">
-                          <Image
-                            alt={article.title}
-                            className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
-                            height={200}
-                            src={article.author.image || "/placeholder.svg"}
-                            width={400}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                        <div className="p-4 space-y-3">
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary">Kesehatan</Badge>
-                            <Badge>{article.author.name}</Badge>
+                        <div className="relative h-48 overflow-hidden">
+                          {article.image?.includes("cloudinary.com") ? (
+                            <CldImage
+                              src={getImageUrl(article.image)}
+                              alt={article.title}
+                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw"
+                            />
+                          ) : (
+                            <Image
+                              alt={article.title}
+                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              src={getImageUrl(article.image)}
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw"
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/80" />
+                          <div className="absolute bottom-0 p-4 w-full">
+                            <div className="flex gap-2 mb-2">
+                              <Badge
+                                variant="secondary"
+                                className="bg-white/90 text-black backdrop-blur-sm"
+                              >
+                                Kesehatan
+                              </Badge>
+                              <Badge
+                                variant="secondary"
+                                className="bg-white/90 text-black backdrop-blur-sm"
+                              >
+                                {new Date(article.createdAt).toLocaleDateString(
+                                  "id-ID",
+                                  { month: "short", year: "numeric" }
+                                )}
+                              </Badge>
+                            </div>
+                            <h3 className="text-lg font-semibold text-white line-clamp-2 mb-2 group-hover:text-primary-foreground">
+                              {article.title}
+                            </h3>
+                            <div className="flex items-center gap-2 text-white/90 text-sm">
+                              <Avatar className="h-6 w-6 border-2 border-white/50">
+                                <AvatarImage src={article.author.image} />
+                                <AvatarFallback className="bg-primary text-white">
+                                  {article.author.name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium">
+                                {article.author.name}
+                              </span>
+                            </div>
                           </div>
-                          <h3 className="text-lg font-semibold line-clamp-2">
-                            {article.title}
-                          </h3>
-                          <p className="text-muted-foreground text-sm">
-                            {new Date(article.createdAt).toLocaleDateString(
-                              "id-ID",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )}
-                          </p>
                         </div>
                       </CardContent>
                     </Card>
