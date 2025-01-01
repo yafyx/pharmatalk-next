@@ -5,7 +5,7 @@ import { Testimonials } from "@/components/testimonials";
 
 export default function Home() {
   return (
-    <div>
+    <div className="relative h-full w-full z-10">
       <Hero />
       <div id="pelayanan">
         <Showcase />

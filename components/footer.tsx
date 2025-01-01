@@ -40,10 +40,39 @@ export const Footer = () => {
   ];
 
   return (
-    <footer className="bg-black text-[#BCBCBC] py-16">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex flex-col items-center">
-          <div className="inline-flex relative w-40 h-12">
+    <footer className="sticky z-0 bottom-0 left-0 w-full h-80 bg-black text-[#BCBCBC]">
+      <div className="relative overflow-hidden w-full h-full flex justify-end px-12 items-start py-12">
+        <div className="flex flex-row space-x-12 sm:space-x-16 md:space-x-24 text-sm sm:text-lg">
+          <ul>
+            {footerLinks.slice(0, 2).map((link) => (
+              <li key={link.label}>
+                <Link
+                  className="hover:text-white transition-colors duration-200"
+                  href={link.href}
+                  onClick={(e) => handleClick(e, link.href)}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <ul>
+            {footerLinks.slice(2).map((link) => (
+              <li key={link.label}>
+                <Link
+                  className="hover:text-white transition-colors duration-200"
+                  href={link.href}
+                  onClick={(e) => handleClick(e, link.href)}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="absolute bottom-8 left-12 flex flex-col items-start">
+          <div className="inline-flex relative w-32 h-10">
             <Image
               fill
               priority
@@ -52,29 +81,9 @@ export const Footer = () => {
               src={logo}
             />
           </div>
-          <p className="mt-4 text-xl font-bold">Pharmatalk</p>
-
-          <nav className="flex flex-col text-center md:flex-row md:justify-center gap-8 mt-12">
-            {footerLinks.map((link) => (
-              <Link
-                key={link.label}
-                aria-label={link.label}
-                className="text-gray-400 hover:text-white transition-colors duration-200 text-sm md:text-base font-medium"
-                href={link.href}
-                onClick={(e) => handleClick(e, link.href)}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex justify-center gap-8 mt-12">
+          <div className="flex gap-6 mt-4">
             {[
-              {
-                icon: SocialX,
-                name: "X (Twitter)",
-                link: "https://twitter.com",
-              },
+              { icon: SocialX, name: "X", link: "https://twitter.com" },
               {
                 icon: SocialInsta,
                 name: "Instagram",
@@ -93,27 +102,26 @@ export const Footer = () => {
             ].map((social) => (
               <Link
                 key={social.name}
-                aria-label={social.name}
-                className="text-gray-400 hover:text-white transition-colors duration-200"
                 href={social.link}
-                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors duration-200"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <Image
-                  alt={social.name}
-                  className="w-6 h-6 invert"
-                  height={24}
                   src={social.icon}
-                  width={24}
+                  alt={social.name}
+                  width={20}
+                  height={20}
+                  className="invert"
                 />
               </Link>
             ))}
           </div>
-
-          <p className="mt-12 text-sm text-[#BCBCBC]">
-            &copy; {new Date().getFullYear()} PharmaTalk. All rights reserved.
-          </p>
         </div>
+
+        <h2 className="absolute bottom-0 right-0 translate-y-1/3 text-[80px] sm:text-[192px] font-bold text-[#1a1a1a]">
+          PharmaTalk
+        </h2>
       </div>
     </footer>
   );

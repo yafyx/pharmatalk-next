@@ -50,7 +50,7 @@ export const Hero = () => {
   const headingWords = ["Solusi", "Kesehatan", "Anda"];
 
   return (
-    <section className="min-h-screen pt-40 pb-20 overflow-hidden relative">
+    <section className="min-h-screen pt-40 pb-20 overflow-hidden relative bg-white">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -69,7 +69,7 @@ export const Hero = () => {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.4, duration: 0.8 }}
-            className="absolute top-8 left-8 w-48 h-48 md:w-60 md:h-60 z-10"
+            className="absolute top-8 left-8 w-48 h-48 md:w-60 md:h-60 z-10 hidden md:block"
           >
             <Image
               src={pillsDrugImage}
@@ -82,7 +82,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.8, duration: 0.8 }}
-            className="absolute bottom-8 right-8 w-48 h-48 md:w-60 md:h-60 z-10"
+            className="absolute bottom-8 right-8 w-48 h-48 md:w-60 md:h-60 z-10 hidden md:block"
           >
             <Image
               src={capsuleImage}
