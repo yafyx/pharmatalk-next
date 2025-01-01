@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import {
   Home,
   Newspaper,
@@ -15,9 +15,11 @@ import {
   PillIcon,
   Building2Icon,
   MessageSquareIcon,
+  UserCircle2Icon,
+  UserCircle2,
 } from "lucide-react";
 
-const authenticatedLinks = [
+const baseLinks = [
   { name: "Beranda", href: "/dashboard", icon: Home, iconFilled: HomeIcon },
   {
     name: "Chat",
@@ -40,8 +42,30 @@ const authenticatedLinks = [
   },
 ];
 
+const adminLink = {
+  name: "User",
+  href: "/user",
+  icon: UserCircle2,
+  iconFilled: UserCircle2Icon,
+};
+
 export function AuthenticatedNav() {
+  const { userId } = useAuth();
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const pathname = usePathname();
+
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+      if (userId) {
+        const response = await fetch(`/api/user/role?clerkId=${userId}`);
+        const data = await response.json();
+        setIsAdmin(data.role === "ADMIN");
+      }
+    };
+    checkAdmin();
+  }, [userId]);
+
+  const authenticatedLinks = isAdmin ? [...baseLinks, adminLink] : baseLinks;
 
   const isActiveLink = (href: string) => {
     if (href === "/dashboard" && pathname === "/") return true;
