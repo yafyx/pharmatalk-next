@@ -19,3 +19,12 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+.marker {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.marker:hover {
+  transform: scale(1.1);
+}

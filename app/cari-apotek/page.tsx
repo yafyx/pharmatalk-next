@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Input } from "@/components/ui/input";
@@ -35,9 +35,39 @@ interface MapboxFeature {
 }
 
 interface MapboxPharmacyFeature extends MapboxFeature {
-  text: string;
-  place_name: string;
-  center: [number, number];
+  properties: {
+    address?: string;
+    name: string;
+    full_address: string;
+    coordinates: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+}
+
+// Add new interfaces for Search Box API
+interface SearchBoxSuggestion {
+  name: string;
+  place_formatted: string;
+  description?: string;
+  mapbox_id: string;
+  feature_type: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  context?: {
+    region?: {
+      name: string;
+    };
+    district?: {
+      name: string;
+    };
+    place?: {
+      name: string;
+    };
+  };
 }
 
 function PharmacyCard({
@@ -83,7 +113,8 @@ export default function Pharmacies() {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [loading, setLoading] = useState(false);
   const [mapCenter] = useState<[number, number]>([106.8456, -6.2088]);
-  const [suggestions, setSuggestions] = useState<MapboxFeature[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchBoxSuggestion[]>([]);
+  const [sessionToken] = useState(() => crypto.randomUUID());
 
   async function fetchSuggestions(query: string) {
     if (!query) {
@@ -93,89 +124,28 @@ export default function Pharmacies() {
 
     try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          query
-        )}.json?` +
+        `https://api.mapbox.com/search/searchbox/v1/suggest?` +
           new URLSearchParams({
+            q: query,
             access_token: mapboxgl.accessToken,
+            session_token: sessionToken,
             country: "ID",
             limit: "5",
-            types: "place,locality,neighborhood,address",
+            types: "poi,address,place",
+            poi_category: "pharmacy",
             language: "id",
           })
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
-      setSuggestions(data.features);
+      setSuggestions(data?.suggestions || []);
     } catch (error) {
       console.error("Error fetching suggestions:", error);
       setSuggestions([]);
-    }
-  }
-
-  async function fetchNearbyPharmacies(lat: number, lng: number) {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/pharmacy.json?` +
-          new URLSearchParams({
-            access_token: mapboxgl.accessToken,
-            proximity: `${lng},${lat}`,
-            limit: "10",
-            types: "poi",
-            language: "id",
-          })
-      );
-      const data = await response.json();
-
-      const pharmaciesList: Pharmacy[] = data.features.map(
-        (feature: MapboxPharmacyFeature) => ({
-          id: feature.id,
-          name: feature.text,
-          address: feature.place_name,
-          distance: calculateDistance(
-            lat,
-            lng,
-            feature.center[1],
-            feature.center[0]
-          ),
-          isOpen: true,
-          lat: feature.center[1],
-          lng: feature.center[0],
-        })
-      );
-
-      setPharmacies(pharmaciesList);
-
-      if (map.current) {
-        const existingMarkers = document.getElementsByClassName("marker");
-        while (existingMarkers[0]) {
-          existingMarkers[0].remove();
-        }
-
-        pharmaciesList.forEach((pharmacy) => {
-          const el = document.createElement("div");
-          el.className = "marker";
-          el.style.backgroundImage = "url(/pharmacy-marker.png)";
-          el.style.width = "32px";
-          el.style.height = "32px";
-          el.style.backgroundSize = "cover";
-
-          if (map.current) {
-            new mapboxgl.Marker(el)
-              .setLngLat([pharmacy.lng, pharmacy.lat])
-              .setPopup(
-                new mapboxgl.Popup().setHTML(
-                  `<h3>${pharmacy.name}</h3><p>${pharmacy.address}</p>`
-                )
-              )
-              .addTo(map.current);
-          }
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching pharmacies:", error);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -198,63 +168,338 @@ export default function Pharmacies() {
     return R * c;
   }
 
-  function handleSuggestionClick(suggestion: MapboxFeature) {
-    const newCenter = suggestion.center;
-    setSearchQuery(suggestion.place_name);
-    setSuggestions([]);
+  const fetchNearbyPharmacies = useCallback(
+    async (lat: number, lng: number) => {
+      if (!lat || !lng) {
+        console.warn("Invalid coordinates provided to fetchNearbyPharmacies");
+        setPharmacies([]);
+        setLoading(false);
+        return;
+      }
 
-    if (map.current) {
-      map.current.flyTo({
-        center: newCenter,
-        zoom: 15,
-        essential: true,
-      });
-    }
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/search/searchbox/v1/category/pharmacy?` +
+            new URLSearchParams({
+              access_token: mapboxgl.accessToken,
+              language: "id",
+              limit: "10",
+              proximity: `${lng},${lat}`,
+            })
+        );
 
-    fetchNearbyPharmacies(newCenter[1], newCenter[0]);
-  }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-  function handleDirections(lat: number, lng: number) {
+        const data = await response.json();
+
+        if (!data || !data.features) {
+          console.warn("No features found in response");
+          setPharmacies([]);
+          return;
+        }
+
+        const pharmaciesList: Pharmacy[] = data.features
+          .filter(
+            (feature: MapboxPharmacyFeature) =>
+              feature?.properties?.name && feature?.geometry?.coordinates
+          )
+          .map((feature: MapboxPharmacyFeature) => ({
+            id: feature.id || crypto.randomUUID(),
+            name: feature.properties.name,
+            address: feature.properties.address || "Alamat tidak tersedia",
+            distance: calculateDistance(
+              lat,
+              lng,
+              feature.geometry.coordinates[1],
+              feature.geometry.coordinates[0]
+            ),
+            isOpen: true,
+            lat: feature.geometry.coordinates[1],
+            lng: feature.geometry.coordinates[0],
+          }));
+
+        setPharmacies(pharmaciesList);
+
+        // Update markers on map
+        if (map.current) {
+          // Clear existing markers
+          const existingMarkers = document.getElementsByClassName("marker");
+          while (existingMarkers[0]) {
+            existingMarkers[0].remove();
+          }
+
+          const bounds = new mapboxgl.LngLatBounds();
+
+          pharmaciesList.forEach((pharmacy) => {
+            // Create marker element
+            const markerEl = document.createElement("div");
+            markerEl.className = "marker";
+            markerEl.innerHTML = `
+            <div class="bg-white p-2 rounded-full shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </div>
+          `;
+
+            bounds.extend([pharmacy.lng, pharmacy.lat]);
+
+            // Create popup
+            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+            <div class="p-2">
+              <h3 class="font-bold">${pharmacy.name}</h3>
+              <p class="text-sm text-gray-600">${pharmacy.address}</p>
+              <p class="text-sm text-gray-500">${pharmacy.distance.toFixed(
+                1
+              )} km</p>
+            </div>
+          `);
+
+            // Add marker to map
+            if (map.current) {
+              new mapboxgl.Marker(markerEl)
+                .setLngLat([pharmacy.lng, pharmacy.lat])
+                .setPopup(popup)
+                .addTo(map.current);
+            }
+          });
+
+          // Fit map to show all markers
+          if (!bounds.isEmpty()) {
+            map.current.fitBounds(bounds, {
+              padding: 50,
+              maxZoom: 15,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching pharmacies:", error);
+        setPharmacies([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const handleSuggestionClick = useCallback(
+    (suggestion: SearchBoxSuggestion) => {
+      if (
+        !suggestion?.coordinates?.latitude ||
+        !suggestion?.coordinates?.longitude
+      ) {
+        console.warn("Invalid suggestion coordinates");
+        return;
+      }
+
+      // Format detailed location with available context
+      const locationDetails = [
+        suggestion.name,
+        suggestion.context?.district?.name,
+        suggestion.context?.place?.name,
+        suggestion.context?.region?.name,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      setSearchQuery(locationDetails || suggestion.name);
+      setSuggestions([]);
+
+      if (map.current) {
+        try {
+          // Clear existing markers
+          const existingMarkers =
+            document.getElementsByClassName("selected-location");
+          while (existingMarkers[0]) {
+            existingMarkers[0].remove();
+          }
+
+          // Add a marker for the selected location
+          const markerEl = document.createElement("div");
+          markerEl.className = "selected-location";
+
+          new mapboxgl.Marker({
+            element: markerEl,
+            color: "#FF0000",
+          })
+            .setLngLat([
+              suggestion.coordinates.longitude,
+              suggestion.coordinates.latitude,
+            ])
+            .setPopup(
+              new mapboxgl.Popup().setHTML(
+                `<div class="p-2">
+                  <h3 class="font-bold">Lokasi yang Dipilih</h3>
+                  <p class="text-sm text-gray-600">${
+                    locationDetails || suggestion.name
+                  }</p>
+                </div>`
+              )
+            )
+            .addTo(map.current);
+
+          map.current.flyTo({
+            center: [
+              suggestion.coordinates.longitude,
+              suggestion.coordinates.latitude,
+            ],
+            zoom: 15,
+            essential: true,
+          });
+
+          fetchNearbyPharmacies(
+            suggestion.coordinates.latitude,
+            suggestion.coordinates.longitude
+          );
+        } catch (error) {
+          console.error("Error handling suggestion click:", error);
+        }
+      }
+    },
+    [fetchNearbyPharmacies]
+  );
+
+  const handleDirections = (lat: number, lng: number): void => {
     window.open(
       `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
       "_blank"
     );
-  }
+  };
+
+  const handleLocationSuccess = useCallback(
+    (position: GeolocationPosition) => {
+      const { latitude, longitude } = position.coords;
+
+      if (!latitude || !longitude) {
+        console.warn("Invalid coordinates from geolocation");
+        return;
+      }
+
+      try {
+        if (map.current) {
+          map.current.flyTo({
+            center: [longitude, latitude],
+            zoom: 15,
+            essential: true,
+          });
+        }
+
+        fetchNearbyPharmacies(latitude, longitude);
+      } catch (error) {
+        console.error("Error handling location success:", error);
+        // Fallback to default location
+        fetchNearbyPharmacies(mapCenter[1], mapCenter[0]);
+      }
+    },
+    [fetchNearbyPharmacies, mapCenter]
+  );
+
+  const handleMapClick = useCallback(
+    (e: mapboxgl.MapMouseEvent) => {
+      if (!e.lngLat) return;
+
+      const { lng, lat } = e.lngLat;
+
+      // Clear existing selected location markers
+      const existingMarkers =
+        document.getElementsByClassName("selected-location");
+      while (existingMarkers[0]) {
+        existingMarkers[0].remove();
+      }
+
+      // Add marker for clicked location
+      const markerEl = document.createElement("div");
+      markerEl.className = "selected-location";
+
+      if (map.current) {
+        new mapboxgl.Marker({
+          element: markerEl,
+          color: "#FF0000",
+        })
+          .setLngLat([lng, lat])
+          .setPopup(
+            new mapboxgl.Popup().setHTML(
+              `<div class="p-2">
+              <h3 class="font-bold">Lokasi yang Dipilih</h3>
+            </div>`
+            )
+          )
+          .addTo(map.current);
+
+        // Update search query with coordinates
+        setSearchQuery(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+
+        // Fetch nearby pharmacies for this location
+        fetchNearbyPharmacies(lat, lng);
+      }
+    },
+    [fetchNearbyPharmacies]
+  );
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: mapCenter,
-      zoom: 13,
-    });
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center: mapCenter,
+        zoom: 13,
+      });
 
-    const geolocate = new mapboxgl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true,
-      },
-      trackUserLocation: true,
-      showUserHeading: true,
-    });
+      const geolocate = new mapboxgl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        },
+        trackUserLocation: true,
+        showUserHeading: true,
+      });
 
-    map.current.addControl(geolocate);
-    map.current.addControl(new mapboxgl.NavigationControl());
-    map.current.addControl(new mapboxgl.FullscreenControl());
-    map.current.addControl(new mapboxgl.ScaleControl());
+      map.current.addControl(geolocate);
+      map.current.addControl(new mapboxgl.NavigationControl());
+      map.current.addControl(new mapboxgl.FullscreenControl());
+      map.current.addControl(new mapboxgl.ScaleControl());
 
-    map.current.on("load", () => {
-      geolocate.trigger();
-    });
+      map.current.on("click", handleMapClick); // Add this line
 
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
-  }, [mapCenter]);
+      map.current.on("load", () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            handleLocationSuccess,
+            (error) => {
+              console.warn("Geolocation error:", error.message);
+              // Fallback to default location
+              fetchNearbyPharmacies(mapCenter[1], mapCenter[0]);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 0,
+            }
+          );
+        } else {
+          console.warn("Geolocation not supported");
+          // Fallback to default location
+          fetchNearbyPharmacies(mapCenter[1], mapCenter[0]);
+        }
+      });
+
+      return () => {
+        if (map.current) {
+          map.current.off("click", handleMapClick); // Clean up event listener
+          map.current.remove();
+          map.current = null;
+        }
+      };
+    } catch (error) {
+      console.error("Error initializing map:", error);
+    }
+  }, [mapCenter, fetchNearbyPharmacies, handleLocationSuccess, handleMapClick]); // Add handleMapClick to dependencies
 
   function handleSearch(searchQuery: string) {
     setLoading(true);
@@ -281,7 +526,11 @@ export default function Pharmacies() {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                fetchSuggestions(e.target.value);
+                if (e.target.value) {
+                  fetchSuggestions(e.target.value);
+                } else {
+                  setSuggestions([]);
+                }
               }}
               onKeyPress={(e) => e.key === "Enter" && handleSearch(searchQuery)}
             />
@@ -290,19 +539,38 @@ export default function Pharmacies() {
               size={20}
             />
 
-            {suggestions.length > 0 && (
+            {Array.isArray(suggestions) && suggestions.length > 0 && (
               <Card className="absolute w-full mt-1 z-50">
-                <ScrollArea className="max-h-[200px]">
-                  {suggestions.map((suggestion) => (
-                    <Button
-                      key={suggestion.id}
-                      variant="ghost"
-                      className="w-full justify-start font-normal"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      {suggestion.place_name}
-                    </Button>
-                  ))}
+                <ScrollArea className="max-h-[300px]">
+                  {suggestions.map((suggestion) => {
+                    const details = [
+                      suggestion.context?.district?.name,
+                      suggestion.context?.place?.name,
+                      suggestion.context?.region?.name,
+                    ]
+                      .filter(Boolean)
+                      .join(", ");
+
+                    return (
+                      <Button
+                        key={suggestion.mapbox_id}
+                        variant="ghost"
+                        className="w-full justify-start font-normal p-4 hover:bg-slate-50"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        <div className="text-left w-full">
+                          <div className="font-medium text-base">
+                            {suggestion.name}
+                          </div>
+                          {details && (
+                            <div className="text-sm text-slate-500 mt-1">
+                              {details}
+                            </div>
+                          )}
+                        </div>
+                      </Button>
+                    );
+                  })}
                 </ScrollArea>
               </Card>
             )}
