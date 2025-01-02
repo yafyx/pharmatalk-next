@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import { Search, Plus, Edit, Trash2 } from "lucide-react";
 
@@ -47,6 +48,8 @@ export default function CariObatPage() {
   const [medicineToDelete, setMedicineToDelete] = useState<Medicine | null>(
     null
   );
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { userId } = useAuth();
 
   useEffect(() => {
     const fetchMedicines = async () => {
@@ -66,6 +69,17 @@ export default function CariObatPage() {
 
     fetchMedicines();
   }, []);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      if (userId) {
+        const response = await fetch(`/api/user/role?clerkId=${userId}`);
+        const data = await response.json();
+        setIsAuthorized(["ADMIN", "APOTEKER", "DOKTER"].includes(data.role));
+      }
+    };
+    checkRole();
+  }, [userId]);
 
   const filteredMedicines = useMemo(() => {
     return medicines.filter((medicine) =>
@@ -140,9 +154,11 @@ export default function CariObatPage() {
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 mt-20 mb-20">
       <h1 className="text-4xl font-bold mb-8 text-primary">Cari Obat</h1>
-      <Button onClick={() => setIsAddModalOpen(true)} className="mb-4">
-        <Plus className="mr-2" /> Tambah Obat
-      </Button>
+      {isAuthorized && (
+        <Button onClick={() => setIsAddModalOpen(true)} className="mb-4">
+          <Plus className="mr-2" /> Tambah Obat
+        </Button>
+      )}
       <div className="mb-8 relative w-full max-w-2xl mx-auto">
         <Input
           placeholder="Masukkan nama obat yang ingin dicari..."
@@ -180,15 +196,17 @@ export default function CariObatPage() {
                 <p className="text-primary font-bold">
                   {formatPrice(medicine.price)}
                 </p>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMedicineToEdit(medicine);
-                    setIsEditModalOpen(true);
-                  }}
-                >
-                  <Edit className="mr-2" /> Edit
-                </Button>
+                {isAuthorized && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMedicineToEdit(medicine);
+                      setIsEditModalOpen(true);
+                    }}
+                  >
+                    <Edit className="mr-2" /> Edit
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -372,14 +390,16 @@ export default function CariObatPage() {
           )}
 
           <DialogFooter className="flex justify-between">
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(selectedMedicine!)}
-              className="w-full sm:w-auto"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Hapus
-            </Button>
+            {isAuthorized && (
+              <Button
+                variant="destructive"
+                onClick={() => handleDelete(selectedMedicine!)}
+                className="w-full sm:w-auto"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Hapus
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => setIsModalOpen(false)}
