@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Smile, Send, ChevronLeft } from "lucide-react";
+import { Send, ChevronLeft, Pill, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -45,6 +45,15 @@ interface ApiUser {
   role?: string;
 }
 
+interface Medicine {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  desc?: string | null;
+  dosage?: string | null;
+}
+
 export function Chat() {
   const { user } = useUser();
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -56,6 +65,10 @@ export function Chat() {
   const [showContactList, setShowContactList] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [showMedicineDialog, setShowMedicineDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -265,10 +278,32 @@ export function Chat() {
     }
   };
 
+  const searchMedicines = async (query: string) => {
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/obat?query=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setMedicines(data.data || []);
+    } catch (error) {
+      console.error("Error searching medicines:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleMedicineSelect = async (medicine: Medicine) => {
+    const medicineMessage = `🏥 *${medicine.name}*\n\n${
+      medicine.category
+    }\nHarga: Rp ${medicine.price.toLocaleString()}\n${
+      medicine.desc || ""
+    }\n\nDosis: ${medicine.dosage || "Sesuai petunjuk dokter"}`;
+    setInputValue(medicineMessage);
+    setShowMedicineDialog(false);
+  };
+
   return (
     <Card className="w-full h-full">
       <div className="flex h-full">
-        {/* Mobile contacts list */}
         <div
           className={`w-full md:w-80 border-r ${
             !showContactList ? "hidden" : "block"
@@ -335,7 +370,6 @@ export function Chat() {
           </ScrollArea>
         </div>
 
-        {/* Chat area */}
         <div
           className={`flex-1 flex flex-col h-full relative ${
             showContactList ? "hidden" : "block"
@@ -373,9 +407,13 @@ export function Chat() {
                 </div>
               </div>
 
-              <ScrollArea className="flex-1 p-4 pt-[85px] pb-[80px]">
+              <ScrollArea
+                className={`flex-1 p-4 pt-[85px] pb-[80px] ${
+                  isLoading ? "flex items-center justify-center" : ""
+                }`}
+              >
                 {isLoading ? (
-                  <div className="flex flex-col justify-center items-center h-full space-y-4">
+                  <div className="flex flex-col justify-center items-center">
                     <div className="w-32 h-32 relative">
                       <Image
                         src="/assets/illust/cat.gif"
@@ -435,8 +473,8 @@ export function Chat() {
                               className={cn(
                                 "text-xs mt-1",
                                 message.sender === "user"
-                                  ? "text-white/70" // Changed from text-primary-foreground
-                                  : "text-gray-500 dark:text-gray-400" // Changed from text-muted-foreground
+                                  ? "text-white/70"
+                                  : "text-gray-500 dark:text-gray-400"
                               )}
                             >
                               {message.timestamp}
@@ -466,8 +504,13 @@ export function Chat() {
                     onKeyDown={handleKeyPress}
                     disabled={isLoading}
                   />
-                  <Button variant="ghost" size="icon" disabled={isLoading}>
-                    <Smile className="h-5 w-5" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={isLoading}
+                    onClick={() => setShowMedicineDialog(true)}
+                  >
+                    <Pill className="h-5 w-5" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -483,9 +526,7 @@ export function Chat() {
           ) : (
             <div className="flex-col items-center justify-center h-full gap-4 md:block hidden">
               <div className="text-center space-y-2">
-                <h3 className="text-lg font-medium">
-                  Selamat Datang di Percakapan
-                </h3>
+                <h3 className="text-lg font-medium">Selamat Datang</h3>
                 <p className="text-muted-foreground">
                   Mulai konsultasi dengan dokter atau apoteker
                 </p>
@@ -527,6 +568,61 @@ export function Chat() {
                 </div>
               </div>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMedicineDialog} onOpenChange={setShowMedicineDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Cari Obat</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Cari obat..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    searchMedicines(searchQuery);
+                  }
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => searchMedicines(searchQuery)}
+                disabled={isSearching}
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+            </div>
+            {isSearching ? (
+              <p className="text-muted-foreground">Mencari...</p>
+            ) : (
+              <div className="space-y-2">
+                {medicines.map((medicine) => (
+                  <div
+                    key={medicine.id}
+                    onClick={() => handleMedicineSelect(medicine)}
+                    className="cursor-pointer hover:bg-muted p-2 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <div className="font-medium">{medicine.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {medicine.category}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Rp {medicine.price.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
