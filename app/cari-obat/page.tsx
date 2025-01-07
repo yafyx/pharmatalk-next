@@ -29,6 +29,7 @@ interface Medicine {
   warning?: string;
   composition?: string;
   manufacturer?: string;
+  image: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -92,9 +93,11 @@ export default function CariObatPage() {
     setIsModalOpen(true);
   };
 
-  const getMedicineImageUrl = (name: string) => {
+  const getMedicineImageUrl = (medicine: Medicine) => {
+    if (medicine.image) return medicine.image;
+
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      name
+      medicine.name
     )}&background=e2e8f0&color=1e293b&size=200&font-size=0.1&length=20&bold=true`;
   };
 
@@ -182,7 +185,7 @@ export default function CariObatPage() {
                   alt={medicine.name}
                   className="w-full aspect-square object-cover rounded-lg hover:opacity-90 transition-opacity"
                   height={200}
-                  src={getMedicineImageUrl(medicine.name)}
+                  src={getMedicineImageUrl(medicine)}
                   width={200}
                 />
               </div>
@@ -298,7 +301,7 @@ export default function CariObatPage() {
                     alt={selectedMedicine.name}
                     className="w-full aspect-square object-cover rounded-lg shadow-md"
                     height={300}
-                    src={getMedicineImageUrl(selectedMedicine.name)}
+                    src={getMedicineImageUrl(selectedMedicine)}
                     width={300}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
