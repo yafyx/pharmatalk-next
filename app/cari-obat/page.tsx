@@ -169,7 +169,7 @@ export default function CariObatPage() {
         <Search className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {filteredMedicines.map((medicine) => (
           <Card
             key={medicine.id}
