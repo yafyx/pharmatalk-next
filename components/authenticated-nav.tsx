@@ -17,7 +17,18 @@ import {
   MessageSquareIcon,
   UserCircle2Icon,
   UserCircle2,
+  Menu,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const baseLinks = [
   { name: "Beranda", href: "/dashboard", icon: Home, iconFilled: HomeIcon },
@@ -52,6 +63,7 @@ const adminLink = {
 export function AuthenticatedNav() {
   const { userId } = useAuth();
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const pathname = usePathname();
 
   React.useEffect(() => {
@@ -73,48 +85,105 @@ export function AuthenticatedNav() {
   };
 
   return (
-    <nav className="mb-4 rounded-2xl border shadow-lg px-2 py-2 bg-white">
-      <div className="flex items-center gap-8">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4">
+    <>
+      <nav className="mb-4 rounded-2xl border shadow-lg px-2 py-2 bg-white hidden md:block">
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
+              {authenticatedLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 ease-in-out ${
+                    isActiveLink(link.href)
+                      ? "text-foreground bg-gray-100 scale-105"
+                      : "text-gray-500 hover:text-foreground hover:bg-gray-50"
+                  }`}
+                >
+                  {link.icon &&
+                    (isActiveLink(link.href) ? (
+                      <link.iconFilled className="h-5 w-5 transition-all duration-200 ease-in-out scale-110" />
+                    ) : (
+                      <link.icon className="h-5 w-5 transition-all duration-200 ease-in-out" />
+                    ))}
+                  <span
+                    className={`text-xs transition-all duration-200 ease-in-out ${
+                      isActiveLink(link.href) ? "font-medium" : ""
+                    }`}
+                  >
+                    {link.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="pl-2 border-l flex flex-col items-center">
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "h-9 w-9",
+                  },
+                }}
+              />
+              <span className="text-xs text-gray-500 mt-1">Akun</span>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="fixed bottom-6 right-6 md:hidden z-[100]">
+        <DropdownMenu onOpenChange={setIsMenuOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className={`h-14 w-14 rounded-full shadow-lg transition-all duration-200 ${
+                isMenuOpen ? "bg-gray-100 scale-105" : ""
+              }`}
+              size="icon"
+              variant="default"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-64 mb-2 mr-2"
+            align="end"
+            alignOffset={-60}
+            sideOffset={0}
+            forceMount
+          >
+            <DropdownMenuLabel>Menu Navigasi</DropdownMenuLabel>
+            <DropdownMenuSeparator />
             {authenticatedLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 ease-in-out ${
-                  isActiveLink(link.href)
-                    ? "text-foreground bg-gray-100 scale-105"
-                    : "text-gray-500 hover:text-foreground hover:bg-gray-50"
-                }`}
-              >
-                {link.icon &&
-                  (isActiveLink(link.href) ? (
-                    <link.iconFilled className="h-5 w-5 transition-all duration-200 ease-in-out scale-110" />
-                  ) : (
-                    <link.icon className="h-5 w-5 transition-all duration-200 ease-in-out" />
-                  ))}
-                <span
-                  className={`text-xs transition-all duration-200 ease-in-out ${
+              <DropdownMenuItem key={link.name} asChild>
+                <Link
+                  href={link.href}
+                  className={`w-full flex items-center gap-3 ${
                     isActiveLink(link.href) ? "font-medium" : ""
                   }`}
                 >
-                  {link.name}
-                </span>
-              </Link>
+                  {link.icon &&
+                    (isActiveLink(link.href) ? (
+                      <link.iconFilled className="h-5 w-5" />
+                    ) : (
+                      <link.icon className="h-5 w-5" />
+                    ))}
+                  <span>{link.name}</span>
+                </Link>
+              </DropdownMenuItem>
             ))}
-          </div>
-          <div className="pl-2 border-l flex flex-col items-center">
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: "h-9 w-9",
-                },
-              }}
-            />
-            <span className="text-xs text-gray-500 mt-1">Akun</span>
-          </div>
-        </div>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-2 flex items-center gap-3">
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "h-8 w-8",
+                  },
+                }}
+              />
+              <span className="text-sm">Akun</span>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </nav>
+    </>
   );
 }
