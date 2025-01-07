@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Smile, Send } from "lucide-react";
+import { Smile, Send, ChevronLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -52,6 +53,17 @@ export function Chat() {
   const [showDialog, setShowDialog] = useState(false);
   const [dokterApoteker, setDokterApoteker] = useState<Contact[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [showContactList, setShowContactList] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     async function fetchContacts() {
@@ -94,6 +106,9 @@ export function Chat() {
   useEffect(() => {
     if (!selectedContact || !user) return;
 
+    setMessages([]);
+    setIsLoading(true);
+
     async function fetchMessages() {
       if (!selectedContact) return;
       try {
@@ -108,6 +123,8 @@ export function Chat() {
         setMessages(data);
       } catch (error) {
         console.error("Error fetching messages:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchMessages();
@@ -251,7 +268,12 @@ export function Chat() {
   return (
     <Card className="w-full h-full">
       <div className="flex h-full">
-        <div className="w-80 border-r hidden md:block">
+        {/* Mobile contacts list */}
+        <div
+          className={`w-full md:w-80 border-r ${
+            !showContactList ? "hidden" : "block"
+          } md:block`}
+        >
           <div className="p-4 border-b flex items-center justify-between">
             <h2 className="font-semibold">Chat ({contacts.length})</h2>
             <Button
@@ -269,7 +291,10 @@ export function Chat() {
                 className={`flex flex-col p-4 hover:bg-muted cursor-pointer ${
                   selectedContact?.id === contact.id ? "bg-muted" : ""
                 }`}
-                onClick={() => setSelectedContact(contact)}
+                onClick={() => {
+                  setSelectedContact(contact);
+                  setShowContactList(false);
+                }}
               >
                 <div className="flex items-center gap-3">
                   <Avatar>
@@ -310,95 +335,128 @@ export function Chat() {
           </ScrollArea>
         </div>
 
-        <div className="flex-1 flex flex-col h-full">
+        {/* Chat area */}
+        <div
+          className={`flex-1 flex flex-col h-full relative ${
+            showContactList ? "hidden" : "block"
+          } md:block`}
+        >
           {selectedContact ? (
             <>
-              <div className="p-4 border-b flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={selectedContact.avatar} />
-                    <AvatarFallback>
-                      {selectedContact.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-semibold">{selectedContact.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedContact.status}
-                    </p>
+              <div className="absolute top-0 left-0 right-0 z-10 bg-background border-b">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="md:hidden mr-2"
+                      onClick={() => setShowContactList(true)}
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <Avatar>
+                      <AvatarImage src={selectedContact.avatar} />
+                      <AvatarFallback>
+                        {selectedContact.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold">{selectedContact.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedContact.status}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={cn(
-                        "flex transition-all duration-200 ease-in-out",
-                        message.sender === "user"
-                          ? "justify-end"
-                          : "justify-start",
-                        message.pending && "opacity-70"
-                      )}
-                    >
-                      <div className="flex items-end gap-2 max-w-[80%]">
-                        {message.sender === "other" && (
-                          <Avatar className="w-8 h-8 shrink-0">
-                            <AvatarImage src={selectedContact.avatar} />
-                            <AvatarFallback>
-                              {selectedContact.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
+              <ScrollArea className="flex-1 p-4 pt-[85px] pb-[80px]">
+                {isLoading ? (
+                  <div className="flex flex-col justify-center items-center h-full space-y-4">
+                    <div className="w-32 h-32 relative">
+                      <Image
+                        src="/assets/illust/cat.gif"
+                        alt="Loading..."
+                        fill
+                        className="object-contain"
+                        priority
+                      />
+                    </div>
+                    <p className="text-muted-foreground text-sm animate-pulse">
+                      Memuat pesan...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={cn(
+                          "flex transition-all duration-200 ease-in-out",
+                          message.sender === "user"
+                            ? "justify-end"
+                            : "justify-start",
+                          message.pending && "opacity-70"
                         )}
-                        <div
-                          className={cn(
-                            "rounded-2xl px-4 py-2 shadow-sm",
-                            message.sender === "user"
-                              ? "bg-blue-600 text-white rounded-br-none"
-                              : "bg-gray-100 dark:bg-gray-800 rounded-bl-none",
-                            "transform transition-all duration-200 hover:scale-[1.02]"
+                      >
+                        <div className="flex items-end gap-2 max-w-[80%]">
+                          {message.sender === "other" && (
+                            <Avatar className="w-8 h-8 shrink-0">
+                              <AvatarImage src={selectedContact.avatar} />
+                              <AvatarFallback>
+                                {selectedContact.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
                           )}
-                        >
-                          <p className="text-sm whitespace-pre-wrap break-words">
-                            {message.content}
-                            {message.pending && (
-                              <span className="ml-2 inline-block">
-                                <span className="animate-pulse">...</span>
-                              </span>
-                            )}
-                          </p>
-                          <p
+                          <div
                             className={cn(
-                              "text-xs mt-1",
+                              "rounded-2xl px-4 py-2 shadow-sm",
                               message.sender === "user"
-                                ? "text-white/70" // Changed from text-primary-foreground
-                                : "text-gray-500 dark:text-gray-400" // Changed from text-muted-foreground
+                                ? "bg-blue-600 text-white rounded-br-none"
+                                : "bg-gray-100 dark:bg-gray-800 rounded-bl-none",
+                              "transform transition-all duration-200 hover:scale-[1.02]"
                             )}
                           >
-                            {message.timestamp}
-                          </p>
+                            <p className="text-sm whitespace-pre-wrap break-words">
+                              {message.content}
+                              {message.pending && (
+                                <span className="ml-2 inline-block">
+                                  <span className="animate-pulse">...</span>
+                                </span>
+                              )}
+                            </p>
+                            <p
+                              className={cn(
+                                "text-xs mt-1",
+                                message.sender === "user"
+                                  ? "text-white/70" // Changed from text-primary-foreground
+                                  : "text-gray-500 dark:text-gray-400" // Changed from text-muted-foreground
+                              )}
+                            >
+                              {message.timestamp}
+                            </p>
+                          </div>
+                          {message.sender === "user" && (
+                            <Avatar className="w-8 h-8 shrink-0">
+                              <AvatarImage src="/placeholder.svg" />
+                              <AvatarFallback>ME</AvatarFallback>
+                            </Avatar>
+                          )}
                         </div>
-                        {message.sender === "user" && (
-                          <Avatar className="w-8 h-8 shrink-0">
-                            <AvatarImage src="/placeholder.svg" />
-                            <AvatarFallback>ME</AvatarFallback>
-                          </Avatar>
-                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                )}
               </ScrollArea>
 
-              <div className="p-4 border-t">
+              <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
                 <div className="flex items-center gap-2">
                   <Input
                     placeholder="Tulis pesan Anda..."
@@ -406,14 +464,16 @@ export function Chat() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyPress}
+                    disabled={isLoading}
                   />
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" disabled={isLoading}>
                     <Smile className="h-5 w-5" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={handleSendMessage}
+                    disabled={!inputValue.trim() || isLoading}
                   >
                     <Send className="h-5 w-5" />
                   </Button>
@@ -421,7 +481,7 @@ export function Chat() {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
+            <div className="flex-col items-center justify-center h-full gap-4 md:block hidden">
               <div className="text-center space-y-2">
                 <h3 className="text-lg font-medium">
                   Selamat Datang di Percakapan
