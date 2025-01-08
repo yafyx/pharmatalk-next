@@ -3,37 +3,54 @@ import { Users, MessageSquare, Newspaper, Activity } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 async function getStats() {
-  const [userCount, chatCount, articleCount] = await Promise.all([
-    prisma.user.count(),
-    prisma.chatMessage.count(),
-    prisma.artikel.count(),
-  ]);
+  try {
+    const [userCount, chatCount, articleCount] = await Promise.all([
+      prisma.user.count(),
+      prisma.chatMessage.count(),
+      prisma.artikel.count(),
+    ]);
 
-  const recentChats = await prisma.chatMessage.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: {
-      sender: {
-        select: {
-          name: true,
-          image: true,
+    const allChats = await prisma.chatMessage.findMany({
+      take: 10,
+      orderBy: { createdAt: "desc" },
+      include: {
+        sender: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
+        receiver: {
+          select: {
+            name: true,
+            image: true,
+          },
         },
       },
-      receiver: {
-        select: {
-          name: true,
-          image: true,
-        },
-      },
-    },
-  });
+    });
 
-  return {
-    userCount,
-    chatCount,
-    articleCount,
-    recentChats,
-  };
+    const recentChats = allChats
+      .filter(
+        (chat) =>
+          chat.sender && chat.receiver && chat.sender.name && chat.receiver.name
+      )
+      .slice(0, 5);
+
+    return {
+      userCount,
+      chatCount,
+      articleCount,
+      recentChats,
+    };
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    return {
+      userCount: 0,
+      chatCount: 0,
+      articleCount: 0,
+      recentChats: [],
+    };
+  }
 }
 
 export default async function AdminDashboard() {
