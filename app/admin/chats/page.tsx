@@ -15,12 +15,22 @@ async function getChats() {
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {
-      sender: true,
-      receiver: true,
+      sender: {
+        select: {
+          name: true,
+          role: true,
+        },
+      },
+      receiver: {
+        select: {
+          name: true,
+          role: true,
+        },
+      },
     },
   });
 
-  return chats;
+  return chats.filter((chat) => chat.sender && chat.receiver);
 }
 
 export default async function AdminChats() {
@@ -29,8 +39,8 @@ export default async function AdminChats() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Chat Monitoring</h1>
-        <p className="text-gray-500">Monitor all chat conversations</p>
+        <h1 className="text-2xl font-bold">Monitoring Percakapan</h1>
+        <p className="text-gray-500">Pantau semua percakapan</p>
       </div>
 
       <Card className="bg-white shadow-sm">
@@ -38,10 +48,10 @@ export default async function AdminChats() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Message</TableHead>
-                <TableHead>Time</TableHead>
+                <TableHead>Dari</TableHead>
+                <TableHead>Ke</TableHead>
+                <TableHead>Pesan</TableHead>
+                <TableHead>Waktu</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -67,7 +77,7 @@ export default async function AdminChats() {
                     <p className="truncate">{chat.content}</p>
                   </TableCell>
                   <TableCell className="text-gray-500">
-                    {new Date(chat.createdAt).toLocaleString()}
+                    {new Date(chat.createdAt).toLocaleString("id-ID")}
                   </TableCell>
                 </TableRow>
               ))}

@@ -13,16 +13,28 @@ async function getStats() {
     take: 5,
     orderBy: { createdAt: "desc" },
     include: {
-      sender: true,
-      receiver: true,
+      sender: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
+      receiver: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
     },
   });
+
+  const validChats = recentChats.filter((chat) => chat.sender && chat.receiver);
 
   return {
     userCount,
     chatCount,
     articleCount,
-    recentChats,
+    recentChats: validChats,
   };
 }
 
