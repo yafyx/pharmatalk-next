@@ -28,13 +28,11 @@ async function getStats() {
     },
   });
 
-  const validChats = recentChats.filter((chat) => chat.sender && chat.receiver);
-
   return {
     userCount,
     chatCount,
     articleCount,
-    recentChats: validChats,
+    recentChats,
   };
 }
 
@@ -44,11 +42,10 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Ikhtisar Dashboard</h1>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
         <p className="text-gray-500">Selamat datang di panel admin</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center space-x-4">
@@ -91,7 +88,6 @@ export default async function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Recent Activity */}
       <Card className="p-6 bg-white shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Percakapan Terbaru</h2>
@@ -100,12 +96,21 @@ export default async function AdminDashboard() {
         <div className="space-y-4">
           {recentChats.map((chat) => (
             <div key={chat.id} className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full" />
+              <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full">
+                {chat.sender?.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={chat.sender.image}
+                    alt={chat.sender.name}
+                    className="w-8 h-8 rounded-full"
+                  />
+                )}
+              </div>
               <div>
                 <p className="text-sm">
-                  <span className="font-medium">{chat.sender.name}</span>
+                  <span className="font-medium">{chat.sender?.name}</span>
                   <span className="text-gray-500"> ke </span>
-                  <span className="font-medium">{chat.receiver.name}</span>
+                  <span className="font-medium">{chat.receiver?.name}</span>
                 </p>
                 <p className="text-sm text-gray-500">{chat.content}</p>
                 <p className="text-xs text-gray-400">

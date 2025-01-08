@@ -163,7 +163,7 @@ export const Hero = () => {
                     </Avatar>
                     <div>
                       <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                        Lina
+                        Anil
                         <Badge className="bg-green-100 text-green-700 border-0">
                           <span className="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse" />
                           Online
