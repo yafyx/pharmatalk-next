@@ -12,6 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 async function getChats() {
   const chats = await prisma.chatMessage.findMany({
+    where: {
+      AND: [{ senderId: { not: "" } }, { receiverId: { not: "" } }],
+    },
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {
@@ -30,7 +33,7 @@ async function getChats() {
     },
   });
 
-  return chats.filter((chat) => chat.sender && chat.receiver);
+  return chats;
 }
 
 export default async function AdminChats() {
