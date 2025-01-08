@@ -1,7 +1,9 @@
+import { hasRole } from '@/lib/auth'
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 const isDashboardRoute = createRouteMatcher(['/dashboard(.*)'])
+const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 const isRootRoute = createRouteMatcher(['/'])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -13,6 +15,14 @@ export default clerkMiddleware(async (auth, req) => {
 
     if (isDashboardRoute(req)) {
         await auth.protect()
+    }
+
+    if (isAdminRoute(req)) {
+        await auth.protect()
+        const isAdmin = await hasRole('ADMIN')
+        if (!isAdmin) {
+            return NextResponse.redirect(new URL('/dashboard', req.url))
+        }
     }
 })
 

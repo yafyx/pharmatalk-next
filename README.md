@@ -17,7 +17,8 @@ PharmaTalk adalah platform inovatif yang menghubungkan masyarakat dengan informa
 
 - **Framework**: Next.js 15.1.0 (React 19)
 - **Bahasa Pemrograman**: TypeScript
-- **Database**: Prisma ORM
+- **Database**: MongoDB
+- **ORM**: Prisma
 - **Styling**: Tailwind CSS
 - **Autentikasi**: Clerk
 - **UI Components**:

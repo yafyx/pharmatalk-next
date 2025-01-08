@@ -524,17 +524,7 @@ export function Chat() {
               </div>
             </>
           ) : (
-            <div className="flex-col items-center justify-center h-full gap-4 md:block hidden">
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-medium">Selamat Datang</h3>
-                <p className="text-muted-foreground">
-                  Mulai konsultasi dengan dokter atau apoteker
-                </p>
-              </div>
-              <Button onClick={() => setShowDialog(true)}>
-                Mulai Percakapan Baru
-              </Button>
-            </div>
+            <div className="flex-col items-center justify-center h-full gap-4 md:block hidden"></div>
           )}
         </div>
       </div>
