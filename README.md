@@ -74,7 +74,3 @@ DELETE / api / users; // Delete user
 3. Commit changes (`git commit -am 'Add amazing feature'`)
 4. Push branch (`git push origin feature/amazing`)
 5. Open Pull Request
-
-## 📝 License
-
-MIT License - see [LICENSE.md](LICENSE.md)
